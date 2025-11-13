@@ -25,6 +25,7 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             overflow: hidden;
+            position: relative;
         }
         
         .header {
@@ -287,6 +288,20 @@
             margin: 20px 0;
         }
         
+        .disclaimer {
+            background: #f8f9fa;
+            border-top: 2px solid #e74c3c;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 20px;
+        }
+        
+        .disclaimer strong {
+            color: #e74c3c;
+        }
+        
         @media (max-width: 768px) {
             .nav-tab {
                 flex: 100%;
@@ -543,6 +558,12 @@
                 <button onclick="changePassword()" class="btn btn-warning">🔄 تغيير كلمة المرور</button>
                 <div id="passwordMessage" style="margin-top: 15px;"></div>
             </div>
+        </div>
+        
+        <!-- إخلاء المسؤولية -->
+        <div class="disclaimer">
+            <strong>تنبيه:</strong> المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. 
+            يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.
         </div>
     </div>
 
