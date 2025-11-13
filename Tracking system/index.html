@@ -26,6 +26,103 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             overflow: hidden;
             position: relative;
+            display: none; /* سيتم إظهاره بعد الموافقة */
+        }
+        
+        /* نافذة الموافقة */
+        .consent-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .consent-content {
+            background: white;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        
+        .consent-content h2 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .consent-content p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .consent-text {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: right;
+        }
+        
+        .consent-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .consent-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .accept-btn {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .accept-btn:hover {
+            background: #219a52;
+        }
+        
+        .decline-btn {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .decline-btn:hover {
+            background: #c0392b;
+        }
+        
+        .disclaimer-top {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 0.85em;
+            border-bottom: 2px solid #f5c6cb;
+        }
+        
+        .disclaimer-top strong {
+            color: #e74c3c;
         }
         
         .header {
@@ -288,7 +385,7 @@
             margin: 20px 0;
         }
         
-        .disclaimer {
+        .disclaimer-bottom {
             background: #f8f9fa;
             border-top: 2px solid #e74c3c;
             padding: 15px;
@@ -298,7 +395,7 @@
             margin-top: 20px;
         }
         
-        .disclaimer strong {
+        .disclaimer-bottom strong {
             color: #e74c3c;
         }
         
@@ -328,11 +425,65 @@
                 margin-bottom: 10px;
                 width: 100%;
             }
+            
+            .disclaimer-top {
+                padding: 8px 15px;
+                font-size: 0.8em;
+            }
+            
+            .consent-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .consent-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- نافذة الموافقة على الشروط -->
+    <div class="consent-modal" id="consentModal">
+        <div class="consent-content">
+            <h2>⚠️ تنبيه هام - إخلاء المسؤولية</h2>
+            <p>قبل استخدام نظام تتبع الحمولة، يرجى قراءة الشروط والأحكام التالية:</p>
+            
+            <div class="consent-text">
+                <p><strong>إخلاء المسؤولية:</strong></p>
+                <p>المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.</p>
+                
+                <p><strong>شروط الاستخدام:</strong></p>
+                <ol>
+                    <li>يستخدم النظام لأغراض تتبع الشحنات فقط</li>
+                    <li>يجب على المستخدم التأكد من صحة البيانات المدخلة</li>
+                    <li>يجب الاحتفاظ بنسخ احتياطية من البيانات المهمة</li>
+                    <li>لا يتحمل المبرمج أي مسؤولية عن فقدان البيانات</li>
+                    <li>يجب استخدام النظام وفقاً للقوانين واللوائح المحلية</li>
+                </ol>
+                
+                <p><strong>تحذير:</strong></p>
+                <p>باستخدامك لهذا النظام، فإنك توافق على أن المبرمج غير مسؤول عن أي خسائر أو أضرار قد تنتج عن استخدام النظام، بما في ذلك但不限于 فقدان البيانات، الأرباح، أو غيرها من الخسائر المباشرة أو غير المباشرة.</p>
+            </div>
+            
+            <p>بالضغط على "أوافق"، فإنك تقر بأنك قد قرأت وفهمت هذه الشروط وتوافق على الالتزام بها.</p>
+            
+            <div class="consent-buttons">
+                <button class="consent-btn accept-btn" onclick="acceptConsent()">أوافق على الشروط</button>
+                <button class="consent-btn decline-btn" onclick="declineConsent()">لا أوافق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- النظام الرئيسي -->
+    <div class="container" id="mainContainer">
+        <!-- إخلاء المسؤولية في الأعلى -->
+        <div class="disclaimer-top">
+            <strong>تنبيه:</strong> المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. 
+            يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.
+        </div>
+        
         <div class="header">
             <h1>📦 نظام تتبع الحمولة</h1>
             <p>نظام بسيط وآمن لمتابعة الحمولات بين الطرفين</p>
@@ -560,14 +711,51 @@
             </div>
         </div>
         
-        <!-- إخلاء المسؤولية -->
-        <div class="disclaimer">
+        <!-- إخلاء المسؤولية في الأسفل -->
+        <div class="disclaimer-bottom">
             <strong>تنبيه:</strong> المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. 
             يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.
         </div>
     </div>
 
     <script>
+        // التحقق من الموافقة عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق مما إذا كان المستخدم قد وافق مسبقاً
+            const hasConsented = localStorage.getItem('consentGiven');
+            
+            if (hasConsented === 'true') {
+                // إذا وافق مسبقاً، إظهار النظام مباشرة
+                document.getElementById('consentModal').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                initializeSystem();
+            } else {
+                // إذا لم يوافق، إظهار نافذة الموافقة
+                document.getElementById('consentModal').style.display = 'flex';
+                document.getElementById('mainContainer').style.display = 'none';
+            }
+        });
+
+        // وظيفة قبول الشروط
+        function acceptConsent() {
+            localStorage.setItem('consentGiven', 'true');
+            document.getElementById('consentModal').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'block';
+            initializeSystem();
+        }
+
+        // وظيفة رفض الشروط
+        function declineConsent() {
+            alert('لا يمكنك استخدام النظام دون الموافقة على الشروط والأحكام.');
+            // يمكن إضافة إعادة توجيه إلى صفحة أخرى أو إغلاق النافذة
+            // window.location.href = 'about:blank'; // إغلاق الصفحة
+        }
+
+        // تهيئة النظام بعد الموافقة
+        function initializeSystem() {
+            shipmentSystem = new ShipmentSystem();
+        }
+
         // نظام تتبع الحمولة - JavaScript الكامل مع التحسينات
         class ShipmentSystem {
             constructor() {
@@ -1135,11 +1323,6 @@
                 messageDiv.innerHTML = '';
             }, 5000);
         }
-
-        // تهيئة النظام عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            shipmentSystem = new ShipmentSystem();
-        });
     </script>
 </body>
 </html>
