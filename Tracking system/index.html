@@ -25,120 +25,6 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             overflow: hidden;
-            position: relative;
-            display: none; /* سيتم إظهاره بعد الموافقة */
-        }
-        
-        /* نافذة الموافقة */
-        .consent-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .consent-content {
-            background: white;
-            width: 90%;
-            max-width: 700px;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-        
-        .consent-content h2 {
-            color: #e74c3c;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-        
-        .consent-content p {
-            margin-bottom: 20px;
-            line-height: 1.6;
-            font-size: 1.1em;
-            color: #333;
-        }
-        
-        .consent-text {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            max-height: 300px;
-            overflow-y: auto;
-            text-align: right;
-        }
-        
-        .consent-options {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 15px 0;
-        }
-        
-        .consent-options input {
-            margin-left: 10px;
-        }
-        
-        .consent-options label {
-            font-size: 1em;
-            color: #333;
-        }
-        
-        .consent-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 25px;
-        }
-        
-        .consent-btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .accept-btn {
-            background: #27ae60;
-            color: white;
-        }
-        
-        .accept-btn:hover {
-            background: #219a52;
-        }
-        
-        .decline-btn {
-            background: #e74c3c;
-            color: white;
-        }
-        
-        .decline-btn:hover {
-            background: #c0392b;
-        }
-        
-        .disclaimer-top {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px 20px;
-            text-align: center;
-            font-size: 0.85em;
-            border-bottom: 2px solid #f5c6cb;
-        }
-        
-        .disclaimer-top strong {
-            color: #e74c3c;
         }
         
         .header {
@@ -332,6 +218,54 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .comparison-result {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .match {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .mismatch {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
         .password-section {
             background: #f8f9fa;
             padding: 20px;
@@ -351,20 +285,6 @@
             display: flex;
             justify-content: space-between;
             margin: 20px 0;
-        }
-        
-        .disclaimer-bottom {
-            background: #f8f9fa;
-            border-top: 2px solid #e74c3c;
-            padding: 15px;
-            text-align: center;
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 20px;
-        }
-        
-        .disclaimer-bottom strong {
-            color: #e74c3c;
         }
         
         @media (max-width: 768px) {
@@ -393,70 +313,11 @@
                 margin-bottom: 10px;
                 width: 100%;
             }
-            
-            .disclaimer-top {
-                padding: 8px 15px;
-                font-size: 0.8em;
-            }
-            
-            .consent-content {
-                width: 95%;
-                padding: 20px;
-            }
-            
-            .consent-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- نافذة الموافقة على الشروط -->
-    <div class="consent-modal" id="consentModal">
-        <div class="consent-content">
-            <h2>⚠️ تنبيه هام - إخلاء المسؤولية</h2>
-            <p>قبل استخدام نظام تتبع الحمولة، يرجى قراءة الشروط والأحكام التالية:</p>
-            
-            <div class="consent-text">
-                <p><strong>إخلاء المسؤولية:</strong></p>
-                <p>المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.</p>
-                
-                <p><strong>شروط الاستخدام:</strong></p>
-                <ol>
-                    <li>يستخدم النظام لأغراض تتبع الشحنات فقط</li>
-                    <li>يجب على المستخدم التأكد من صحة البيانات المدخلة</li>
-                    <li>يجب الاحتفاظ بنسخ احتياطية من البيانات المهمة</li>
-                    <li>لا يتحمل المبرمج أي مسؤولية عن فقدان البيانات</li>
-                    <li>يجب استخدام النظام وفقاً للقوانين واللوائح المحلية</li>
-                </ol>
-                
-                <p><strong>تحذير:</strong></p>
-                <p>باستخدامك لهذا النظام، فإنك توافق على أن المبرمج غير مسؤول عن أي خسائر أو أضرار قد تنتج عن استخدام النظام، بما في ذلك但不限于 فقدان البيانات، الأرباح، أو غيرها من الخسائر المباشرة أو غير المباشرة.</p>
-            </div>
-            
-            <p>بالضغط على "أوافق"، فإنك تقر بأنك قد قرأت وفهمت هذه الشروط وتوافق على الالتزام بها.</p>
-            
-            <div class="consent-options">
-                <input type="checkbox" id="dontShowAgain">
-                <label for="dontShowAgain">عدم الإظهار مجدداً</label>
-            </div>
-            
-            <div class="consent-buttons">
-                <button class="consent-btn accept-btn" onclick="acceptConsent()">أوافق على الشروط</button>
-                <button class="consent-btn decline-btn" onclick="declineConsent()">لا أوافق</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- النظام الرئيسي -->
-    <div class="container" id="mainContainer">
-        <!-- إخلاء المسؤولية في الأعلى -->
-        <div class="disclaimer-top">
-            <strong>تنبيه:</strong> المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. 
-            يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.
-        </div>
-        
+    <div class="container">
         <div class="header">
             <h1>📦 نظام تتبع الحمولة</h1>
             <p>نظام بسيط وآمن لمتابعة الحمولات بين الطرفين</p>
@@ -476,6 +337,21 @@
         <div id="home" class="tab-content active">
             <h2>مرحباً بك في نظام تتبع الحمولة</h2>
             <p>هذا النظام يمكنك من تتبع ومقارنة بيانات الحمولات بين الطرفين بشكل آمن ومحكم.</p>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalShipments">0</div>
+                    <div class="stat-label">إجمالي الشحنات</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeShipments">0</div>
+                    <div class="stat-label">الشحنات النشطة</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completedShipments">0</div>
+                    <div class="stat-label">الشحنات المكتملة</div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col">
@@ -511,7 +387,7 @@
                     <li>📊 مشاهدة جميع الشحنات والنتائج</li>
                     <li>🔍 مقارنة البيانات بين الطرفين</li>
                     <li>🗑️ إمكانية حذف الشحنات</li>
-                    <li>📥 تحميل البيانات</li>
+                    <li>📥 تصدير البيانات إلى Excel</li>
                     <li>🔐 نظام حماية بكلمة مرور</li>
                 </ul>
                 <button class="btn btn-success" onclick="openTab('reports')" style="margin-top: 15px;">الدخول إلى التقارير</button>
@@ -542,9 +418,9 @@
                                    placeholder="اسم الشركة أو الشخص">
                         </div>
                         <div class="form-group">
-                            <label for="units1">عدد الوحدات *</label>
-                            <input type="number" id="units1" class="form-control" required 
-                                   placeholder="أدخل عدد الوحدات">
+                            <label for="details1">تفاصيل الحمولة *</label>
+                            <textarea id="details1" class="form-control" rows="4" required 
+                                      placeholder="وصف تفصيلي للحمولة..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -589,9 +465,9 @@
                                    placeholder="اسم الشركة أو الشخص">
                         </div>
                         <div class="form-group">
-                            <label for="units2">عدد الوحدات *</label>
-                            <input type="number" id="units2" class="form-control" required
-                                   placeholder="أدخل عدد الوحدات كما تم فحصها">
+                            <label for="details2">تفاصيل الحمولة *</label>
+                            <textarea id="details2" class="form-control" rows="4" required
+                                      placeholder="وصف تفصيلي للحمولة كما تم فحصها..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -617,9 +493,11 @@
             
             <div id="reportsContent" style="display: none;">
                 <div class="actions">
-                    <button onclick="exportToExcel()" class="btn btn-success">📥 تحميل البيانات</button>
+                    <button onclick="exportToExcel()" class="btn btn-success">📥 تصدير إلى Excel</button>
                     <button onclick="deleteAllShipments()" class="btn btn-danger">🗑️ حذف جميع الشحنات</button>
                 </div>
+                
+                <div class="stats" id="reportsStats"></div>
                 
                 <div class="form-group">
                     <label for="filterStatus">تصفية حسب الحالة:</label>
@@ -666,64 +544,9 @@
                 <div id="passwordMessage" style="margin-top: 15px;"></div>
             </div>
         </div>
-        
-        <!-- إخلاء المسؤولية في الأسفل -->
-        <div class="disclaimer-bottom">
-            <strong>تنبيه:</strong> المبرمج غير مسئول عن أي فقدان للبيانات أو أي أضرار ناتجة عن الاستخدام. 
-            يتحمل المستخدم المسؤولية الكاملة عن نسخ احتياطي للبيانات والحفاظ عليها.
-        </div>
     </div>
 
     <script>
-        // التحقق من الموافقة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            // التحقق مما إذا كان المستخدم قد وافق مسبقاً
-            const hasConsented = localStorage.getItem('consentGiven');
-            const dontShowAgain = localStorage.getItem('dontShowDisclaimerAgain');
-            
-            if (hasConsented === 'true' && dontShowAgain === 'true') {
-                // إذا وافق مسبقاً واختار عدم الإظهار مجدداً، إظهار النظام مباشرة
-                document.getElementById('consentModal').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                initializeSystem();
-            } else if (hasConsented === 'true') {
-                // إذا وافق مسبقاً ولكن لم يختر عدم الإظهار مجدداً، إظهار نافذة الموافقة
-                document.getElementById('consentModal').style.display = 'flex';
-                document.getElementById('mainContainer').style.display = 'none';
-            } else {
-                // إذا لم يوافق، إظهار نافذة الموافقة
-                document.getElementById('consentModal').style.display = 'flex';
-                document.getElementById('mainContainer').style.display = 'none';
-            }
-        });
-
-        // وظيفة قبول الشروط
-        function acceptConsent() {
-            const dontShowAgain = document.getElementById('dontShowAgain').checked;
-            
-            localStorage.setItem('consentGiven', 'true');
-            
-            if (dontShowAgain) {
-                localStorage.setItem('dontShowDisclaimerAgain', 'true');
-            }
-            
-            document.getElementById('consentModal').style.display = 'none';
-            document.getElementById('mainContainer').style.display = 'block';
-            initializeSystem();
-        }
-
-        // وظيفة رفض الشروط
-        function declineConsent() {
-            alert('لا يمكنك استخدام النظام دون الموافقة على الشروط والأحكام.');
-            // يمكن إضافة إعادة توجيه إلى صفحة أخرى أو إغلاق النافذة
-            // window.location.href = 'about:blank'; // إغلاق الصفحة
-        }
-
-        // تهيئة النظام بعد الموافقة
-        function initializeSystem() {
-            shipmentSystem = new ShipmentSystem();
-        }
-
         // نظام تتبع الحمولة - JavaScript الكامل مع التحسينات
         class ShipmentSystem {
             constructor() {
@@ -733,6 +556,7 @@
             }
 
             init() {
+                this.updateStats();
                 this.setupEventListeners();
             }
 
@@ -753,22 +577,17 @@
             addFirstParty() {
                 const shipmentNumber = document.getElementById('shipmentNumber1').value.trim();
                 const weight = parseFloat(document.getElementById('weight1').value);
-                const units = parseInt(document.getElementById('units1').value);
+                const details = document.getElementById('details1').value.trim();
                 const partyName = document.getElementById('party1Name').value.trim();
 
                 // التحقق من البيانات
-                if (!shipmentNumber || !weight || !units || !partyName) {
+                if (!shipmentNumber || !weight || !details || !partyName) {
                     this.showMessage('party1Message', '❌ يرجى ملء جميع الحقول المطلوبة', 'error');
                     return;
                 }
 
                 if (weight <= 0) {
                     this.showMessage('party1Message', '❌ يرجى إدخال وزن صحيح', 'error');
-                    return;
-                }
-
-                if (units <= 0) {
-                    this.showMessage('party1Message', '❌ يرجى إدخال عدد وحدات صحيح', 'error');
                     return;
                 }
 
@@ -783,21 +602,20 @@
                     }
 
                     shipment.weight1 = weight;
-                    shipment.units1 = units;
+                    shipment.details1 = details;
                     shipment.party1Name = partyName;
                     shipment.updatedAt = new Date().toISOString();
 
                     // إذا كانت بيانات الطرف الثاني موجودة، نقارن
                     if (shipment.weight2 !== null) {
                         const weightMatch = shipment.weight1 === shipment.weight2;
-                        const unitsMatch = shipment.units1 === shipment.units2;
+                        const detailsMatch = shipment.details1.toLowerCase() === shipment.details2.toLowerCase();
                         
-                        shipment.status = weightMatch && unitsMatch ? 'completed' : 'completed';
+                        shipment.status = weightMatch && detailsMatch ? 'completed' : 'completed';
                         shipment.comparison = {
                             weightMatch: weightMatch,
-                            unitsMatch: unitsMatch,
-                            weightDifference: shipment.weight1 - shipment.weight2,
-                            unitsDifference: shipment.units1 - shipment.units2
+                            detailsMatch: detailsMatch,
+                            weightDifference: shipment.weight1 - shipment.weight2
                         };
                     } else {
                         shipment.status = 'active';
@@ -808,10 +626,10 @@
                         id: Date.now(),
                         shipmentNumber: shipmentNumber,
                         weight1: weight,
-                        units1: units,
+                        details1: details,
                         party1Name: partyName,
                         weight2: null,
-                        units2: null,
+                        details2: null,
                         party2Name: null,
                         status: 'active',
                         createdAt: new Date().toISOString(),
@@ -826,15 +644,16 @@
                     `✅ تم إدخال بيانات الطرف الأول بنجاح للشحنة: ${shipmentNumber}`, 
                     'success');
                 this.clearForm('party1Form');
+                this.updateStats();
             }
 
             addSecondParty() {
                 const shipmentNumber = document.getElementById('shipmentNumber2').value.trim();
                 const weight = parseFloat(document.getElementById('weight2').value);
-                const units = parseInt(document.getElementById('units2').value);
+                const details = document.getElementById('details2').value.trim();
                 const partyName = document.getElementById('party2Name').value.trim();
 
-                if (!shipmentNumber || !weight || weight <= 0 || !units || units <= 0 || !partyName) {
+                if (!shipmentNumber || !weight || weight <= 0 || !details || !partyName) {
                     this.showMessage('party2Message', '❌ يرجى ملء جميع الحقول المطلوبة بشكل صحيح', 'error');
                     return;
                 }
@@ -850,21 +669,20 @@
                     }
 
                     shipment.weight2 = weight;
-                    shipment.units2 = units;
+                    shipment.details2 = details;
                     shipment.party2Name = partyName;
                     shipment.updatedAt = new Date().toISOString();
 
                     // إذا كانت بيانات الطرف الأول موجودة، نقارن
                     if (shipment.weight1 !== null) {
                         const weightMatch = shipment.weight1 === shipment.weight2;
-                        const unitsMatch = shipment.units1 === shipment.units2;
+                        const detailsMatch = shipment.details1.toLowerCase() === shipment.details2.toLowerCase();
                         
                         shipment.status = 'completed';
                         shipment.comparison = {
                             weightMatch: weightMatch,
-                            unitsMatch: unitsMatch,
-                            weightDifference: shipment.weight1 - shipment.weight2,
-                            unitsDifference: shipment.units1 - shipment.units2
+                            detailsMatch: detailsMatch,
+                            weightDifference: shipment.weight1 - shipment.weight2
                         };
                     } else {
                         shipment.status = 'active';
@@ -875,10 +693,10 @@
                         id: Date.now(),
                         shipmentNumber: shipmentNumber,
                         weight1: null,
-                        units1: null,
+                        details1: null,
                         party1Name: null,
                         weight2: weight,
-                        units2: units,
+                        details2: details,
                         party2Name: partyName,
                         status: 'active',
                         createdAt: new Date().toISOString(),
@@ -893,6 +711,7 @@
                 
                 this.showMessage('party2Message', message, 'success');
                 this.clearForm('party2Form');
+                this.updateStats();
             }
 
             loadReports() {
@@ -908,7 +727,35 @@
             }
 
             displayReports() {
+                const statsDiv = document.getElementById('reportsStats');
                 const listDiv = document.getElementById('shipmentsList');
+
+                // الإحصائيات
+                const total = this.shipments.length;
+                const active = this.shipments.filter(s => s.status === 'active').length;
+                const completed = this.shipments.filter(s => s.status === 'completed').length;
+                const matching = this.shipments.filter(s => s.comparison && s.comparison.weightMatch && s.comparison.detailsMatch).length;
+                const mismatched = this.shipments.filter(s => s.comparison && (!s.comparison.weightMatch || !s.comparison.detailsMatch)).length;
+
+                statsDiv.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${total}</div>
+                        <div class="stat-label">إجمالي الشحنات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${active}</div>
+                        <div class="stat-label">نشطة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${completed}</div>
+                        <div class="stat-label">مكتملة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${matching}</div>
+                        <div class="stat-label">متطابقة</div>
+                    </div>
+                `;
+
                 this.filterShipments();
             }
 
@@ -923,9 +770,9 @@
                     } else if (filterStatus === 'completed') {
                         filteredShipments = this.shipments.filter(s => s.status === 'completed');
                     } else if (filterStatus === 'matching') {
-                        filteredShipments = this.shipments.filter(s => s.comparison && s.comparison.weightMatch && s.comparison.unitsMatch);
+                        filteredShipments = this.shipments.filter(s => s.comparison && s.comparison.weightMatch && s.comparison.detailsMatch);
                     } else if (filterStatus === 'mismatched') {
-                        filteredShipments = this.shipments.filter(s => s.comparison && (!s.comparison.weightMatch || !s.comparison.unitsMatch));
+                        filteredShipments = this.shipments.filter(s => s.comparison && (!s.comparison.weightMatch || !s.comparison.detailsMatch));
                     }
                 }
 
@@ -938,7 +785,7 @@
                 let html = '<h3>📋 قائمة الشحنات - للمراجعة</h3>';
                 filteredShipments.forEach(shipment => {
                     const statusIcon = shipment.status === 'completed' ? '✅' : '⏳';
-                    const isMatching = shipment.comparison && shipment.comparison.weightMatch && shipment.comparison.unitsMatch;
+                    const isMatching = shipment.comparison && shipment.comparison.weightMatch && shipment.comparison.detailsMatch;
                     const matchStatus = shipment.status === 'completed' ? 
                         (isMatching ? '✅ متطابقة' : '❌ غير متطابقة') : '⏳ قيد المعالجة';
                     
@@ -953,8 +800,7 @@
                                 <div class="col">
                                     <strong>الطرف الأول:</strong> ${shipment.party1Name || 'لم يدخل'}<br>
                                     <strong>الطرف الثاني:</strong> ${shipment.party2Name || 'لم يدخل'}<br>
-                                    <strong>الوزن:</strong> ${shipment.weight1 ? shipment.weight1 + ' كجم' : 'لم يدخل'} ${shipment.weight2 ? `/ ${shipment.weight2} كجم` : ''}<br>
-                                    <strong>الوحدات:</strong> ${shipment.units1 ? shipment.units1 + ' وحدة' : 'لم يدخل'} ${shipment.units2 ? `/ ${shipment.units2} وحدة` : ''}
+                                    <strong>الوزن:</strong> ${shipment.weight1 ? shipment.weight1 + ' كجم' : 'لم يدخل'} ${shipment.weight2 ? `/ ${shipment.weight2} كجم` : ''}
                                 </div>
                             </div>
                             ${shipment.status === 'completed' ? `
@@ -963,7 +809,7 @@
                                     <strong>نتيجة المقارنة:</strong> ${matchStatus}<br>
                                     ${shipment.comparison ? `
                                     • الوزن: ${shipment.comparison.weightMatch ? '✅ متطابق' : '❌ غير متطابق'}<br>
-                                    • الوحدات: ${shipment.comparison.unitsMatch ? '✅ متطابق' : '❌ غير متطابق'}
+                                    • التفاصيل: ${shipment.comparison.detailsMatch ? '✅ متطابق' : '❌ غير متطابق'}
                                     ` : ''}
                                 </div>
                             </div>
@@ -1000,7 +846,7 @@
                                 <div class="alert alert-info">
                                     <h5>👤 بيانات الطرف الأول:</h5>
                                     <strong>الوزن:</strong> ${shipment.weight1} كجم<br>
-                                    <strong>الوحدات:</strong> ${shipment.units1} وحدة<br>
+                                    <strong>التفاصيل:</strong> ${shipment.details1}<br>
                                     <strong>الطرف:</strong> ${shipment.party1Name}<br>
                                     <strong>وقت الإدخال:</strong> ${new Date(shipment.createdAt).toLocaleString('ar-SA')}
                                 </div>
@@ -1024,7 +870,7 @@
                                 <div class="alert alert-info">
                                     <h5>👥 بيانات الطرف الثاني:</h5>
                                     <strong>الوزن:</strong> ${shipment.weight2} كجم<br>
-                                    <strong>الوحدات:</strong> ${shipment.units2} وحدة<br>
+                                    <strong>التفاصيل:</strong> ${shipment.details2}<br>
                                     <strong>الطرف:</strong> ${shipment.party2Name}<br>
                                     <strong>وقت الإدخال:</strong> ${new Date(shipment.updatedAt).toLocaleString('ar-SA')}
                                 </div>
@@ -1044,14 +890,14 @@
 
                 if (shipment.status === 'completed' && shipment.comparison) {
                     html += `
-                        <div class="comparison-result ${shipment.comparison.weightMatch && shipment.comparison.unitsMatch ? 'match' : 'mismatch'}">
-                            ${shipment.comparison.weightMatch && shipment.comparison.unitsMatch ? '🎉 البيانات متطابقة تماماً' : '❌ هناك اختلاف في البيانات'}
+                        <div class="comparison-result ${shipment.comparison.weightMatch && shipment.comparison.detailsMatch ? 'match' : 'mismatch'}">
+                            ${shipment.comparison.weightMatch && shipment.comparison.detailsMatch ? '🎉 البيانات متطابقة تماماً' : '❌ هناك اختلاف في البيانات'}
                         </div>
                         <div class="row">
                             <div class="col">
                                 <strong>تفاصيل المقارنة:</strong><br>
                                 • الوزن: ${shipment.comparison.weightMatch ? '✅ متطابق' : `❌ غير متطابق (فرق: ${Math.abs(shipment.comparison.weightDifference).toFixed(2)} كجم)`}<br>
-                                • الوحدات: ${shipment.comparison.unitsMatch ? '✅ متطابق' : `❌ غير متطابق (فرق: ${Math.abs(shipment.comparison.unitsDifference)} وحدة)`}
+                                • التفاصيل: ${shipment.comparison.detailsMatch ? '✅ متطابق' : '❌ غير متطابق'}
                             </div>
                         </div>
                     `;
@@ -1068,6 +914,7 @@
                     this.shipments = this.shipments.filter(s => s.shipmentNumber !== shipmentNumber);
                     this.saveToStorage();
                     this.displayReports();
+                    this.updateStats();
                     alert('✅ تم حذف الشحنة بنجاح');
                 }
             }
@@ -1077,18 +924,19 @@
                     this.shipments = [];
                     this.saveToStorage();
                     this.displayReports();
+                    this.updateStats();
                     alert('✅ تم حذف جميع الشحنات بنجاح');
                 }
             }
 
             exportToExcel() {
                 if (this.shipments.length === 0) {
-                    alert('❌ لا توجد بيانات لتحميلها');
+                    alert('❌ لا توجد بيانات لتصديرها');
                     return;
                 }
 
-                // إنشاء بيانات CSV
-                let csvContent = "رقم الشحنة,الطرف الأول,الطرف الثاني,وزن الطرف الأول,وزن الطرف الثاني,وحدات الطرف الأول,وحدات الطرف الثاني,الحالة,تاريخ الإنشاء,تاريخ التحديث\n";
+                // إنشاء بيانات Excel
+                let csvContent = "رقم الشحنة,الطرف الأول,الطرف الثاني,وزن الطرف الأول,وزن الطرف الثاني,تفاصيل الطرف الأول,تفاصيل الطرف الثاني,الحالة,تاريخ الإنشاء,تاريخ التحديث\n";
                 
                 this.shipments.forEach(shipment => {
                     const row = [
@@ -1097,8 +945,8 @@
                         shipment.party2Name || '',
                         shipment.weight1 || '',
                         shipment.weight2 || '',
-                        shipment.units1 || '',
-                        shipment.units2 || '',
+                        `"${(shipment.details1 || '').replace(/"/g, '""')}"`,
+                        `"${(shipment.details2 || '').replace(/"/g, '""')}"`,
                         this.getStatusText(shipment.status),
                         shipment.createdAt,
                         shipment.updatedAt
@@ -1117,7 +965,7 @@
                 link.click();
                 document.body.removeChild(link);
                 
-                alert('✅ تم تحميل البيانات بنجاح');
+                alert('✅ تم تصدير البيانات بنجاح');
             }
 
             changePassword(currentPassword, newPassword, confirmPassword) {
@@ -1144,6 +992,16 @@
                     'completed': 'مكتملة'
                 };
                 return statusMap[status] || status;
+            }
+
+            updateStats() {
+                const total = this.shipments.length;
+                const active = this.shipments.filter(s => s.status === 'active').length;
+                const completed = this.shipments.filter(s => s.status === 'completed').length;
+
+                document.getElementById('totalShipments').textContent = total;
+                document.getElementById('activeShipments').textContent = active;
+                document.getElementById('completedShipments').textContent = completed;
             }
 
             showMessage(elementId, message, type) {
@@ -1189,6 +1047,11 @@
             const activeTab = navTabsArray.find(tab => tab.getAttribute('onclick').includes(tabName));
             if (activeTab) {
                 activeTab.classList.add('active');
+            }
+
+            // تحديث الإحصائيات إذا كانت الصفحة الرئيسية
+            if (tabName === 'home' && shipmentSystem) {
+                shipmentSystem.updateStats();
             }
         }
 
@@ -1251,6 +1114,24 @@
                 messageDiv.innerHTML = '';
             }, 5000);
         }
-    </script>
+
+        // تهيئة النظام عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            shipmentSystem = new ShipmentSystem();
+        });
+    </scriptfunction sendSMS(message) {
+    fetch("http://localhost:3000/send-sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            phone: "+966544957118",
+            message: message
+        })
+    })
+    .then(res => res.json())
+    .then(data => console.log("SMS SENT:", data))
+    .catch(err => console.error("SMS ERROR:", err));
+}
+>
 </body>
 </html>
