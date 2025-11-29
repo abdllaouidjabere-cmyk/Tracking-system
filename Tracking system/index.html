@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* جميع الأنماط السابقة تبقى كما هي */
         * {
             margin: 0;
             padding: 0;
@@ -718,20 +717,68 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
+        /* تنسيقات جديدة لنافذة معاينة الفاتورة */
+        .invoice-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .invoice-preview-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .preview-actions .btn {
+            margin: 0 5px;
+        }
+        
         /* تنسيقات خاصة للطباعة */
         @media print {
             body * {
                 visibility: hidden;
             }
-            .invoice-preview, .invoice-preview * {
+            .invoice-preview-content, .invoice-preview-content * {
                 visibility: visible;
             }
-            .invoice-preview {
+            .invoice-preview-content {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
                 box-shadow: none;
+                padding: 20px;
+            }
+            .preview-actions {
+                display: none;
             }
         }
         
@@ -785,6 +832,16 @@
                 margin-top: 10px;
                 width: 100%;
                 justify-content: space-between;
+            }
+            
+            .preview-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .preview-actions .btn {
+                width: 100%;
+                margin-bottom: 10px;
             }
         }
     </style>
@@ -1400,8 +1457,15 @@
         </div>
     </div>
 
+    <!-- نافذة معاينة الفاتورة -->
+    <div id="invoicePreviewModal" class="invoice-preview-modal">
+        <div class="invoice-preview-content" id="invoicePreviewContent">
+            <!-- محتوى الفاتورة سيتم إضافته هنا -->
+        </div>
+    </div>
+
     <script>
-        // نظام "حساباتك" المتكامل - JavaScript الكامل مع إصلاح شامل لمشكلة PDF
+        // نظام "حساباتك" المتكامل - JavaScript الكامل مع تعديل المعاينة
         class AccountSystem {
             constructor() {
                 this.shipments = JSON.parse(localStorage.getItem('shipments')) || [];
@@ -1932,7 +1996,7 @@
                             <td>${invoice.totalAmount.toFixed(2)} ريال</td>
                             <td><span class="badge ${this.getInvoiceStatusClass(invoice.invoiceStatus)}">${this.getInvoiceStatusText(invoice.invoiceStatus)}</span></td>
                             <td>
-                                <button class="btn btn-warning" onclick="viewInvoice(${invoice.id})">👁️ عرض</button>
+                                <button class="btn btn-warning" onclick="viewInvoice(${invoice.id})">👁️ معاينة</button>
                                 <button class="btn btn-danger" onclick="deleteInvoice(${invoice.id})">🗑️ حذف</button>
                                 <button class="btn btn-teal" onclick="printInvoice(${invoice.id})">🖨️ طباعة</button>
                             </td>
@@ -1971,65 +2035,114 @@
 
                 // إنشاء محتوى الفاتورة
                 let html = `
-                    <div class="invoice-preview">
-                        <div class="invoice-header">
-                            <div class="company-info">
-                                ${invoice.companyLogo ? `<img src="${invoice.companyLogo}" class="company-logo" alt="شعار الشركة">` : ''}
-                                <div class="company-details">
-                                    ${invoice.companyName ? `<h3>${invoice.companyName}</h3>` : ''}
-                                    <p>${invoice.invoiceDate}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <h2>فاتورة #${invoice.invoiceNumber}</h2>
-                                <p><strong>الحالة:</strong> <span class="badge ${this.getInvoiceStatusClass(invoice.invoiceStatus)}">${this.getInvoiceStatusText(invoice.invoiceStatus)}</span></p>
-                            </div>
-                        </div>
-                        
-                        <div class="row" style="margin-bottom: 20px;">
-                            <div class="col">
-                                <h4>معلومات العميل</h4>
-                                <p><strong>اسم العميل:</strong> ${invoice.clientName}</p>
-                                ${invoice.shipmentNumberInvoice ? `<p><strong>رقم الشحنة:</strong> ${invoice.shipmentNumberInvoice}</p>` : ''}
-                            </div>
-                            <div class="col">
-                                <h4>معلومات الفاتورة</h4>
-                                <p><strong>تاريخ الإصدار:</strong> ${invoice.invoiceDate}</p>
-                                <p><strong>تاريخ الاستحقاق:</strong> ${invoice.dueDate}</p>
+                    <div class="preview-header">
+                        <h2>فاتورة #${invoice.invoiceNumber}</h2>
+                        <button class="close-modal" onclick="closeInvoicePreview()">✕</button>
+                    </div>
+                    
+                    <div class="invoice-header">
+                        <div class="company-info">
+                            ${invoice.companyLogo ? `<img src="${invoice.companyLogo}" class="company-logo" alt="شعار الشركة">` : ''}
+                            <div class="company-details">
+                                ${invoice.companyName ? `<h3>${invoice.companyName}</h3>` : ''}
+                                <p>${invoice.invoiceDate}</p>
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <h4>بنود الفاتورة</h4>
-                            <div style="background: #f5f5f5; padding: 15px; border-radius: 10px;">
-                                ${invoice.invoiceItems.split('\n').map(item => `<p>${item}</p>`).join('')}
-                            </div>
+                        <div>
+                            <p><strong>الحالة:</strong> <span class="badge ${this.getInvoiceStatusClass(invoice.invoiceStatus)}">${this.getInvoiceStatusText(invoice.invoiceStatus)}</span></p>
                         </div>
-                        
-                        <div class="row" style="margin-top: 20px;">
-                            <div class="col">
-                                <h4>ملخص المدفوعات</h4>
-                                <p><strong>المبلغ الإجمالي (بدون ضريبة):</strong> ${invoice.subtotal.toFixed(2)} ريال</p>
-                                <p><strong>نسبة الضريبة:</strong> ${invoice.taxRate}%</p>
-                                <p><strong>مبلغ الضريبة:</strong> ${(invoice.subtotal * invoice.taxRate / 100).toFixed(2)} ريال</p>
-                                <p><strong>المبلغ الإجمالي:</strong> <strong style="font-size: 1.2em;">${invoice.totalAmount.toFixed(2)} ريال</strong></p>
-                            </div>
+                    </div>
+                    
+                    <div class="row" style="margin-bottom: 20px;">
+                        <div class="col">
+                            <h4>معلومات العميل</h4>
+                            <p><strong>اسم العميل:</strong> ${invoice.clientName}</p>
+                            ${invoice.shipmentNumberInvoice ? `<p><strong>رقم الشحنة:</strong> ${invoice.shipmentNumberInvoice}</p>` : ''}
                         </div>
-                        
-                        <div class="qrcode-container">
-                            <h4>رمز QR للفاتورة</h4>
-                            <div id="qrcode-${invoice.id}"></div>
+                        <div class="col">
+                            <h4>معلومات الفاتورة</h4>
+                            <p><strong>تاريخ الإصدار:</strong> ${invoice.invoiceDate}</p>
+                            <p><strong>تاريخ الاستحقاق:</strong> ${invoice.dueDate}</p>
                         </div>
-                        
-                        <div class="invoice-footer">
-                            <p>شكراً لتعاملكم معنا</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <h4>بنود الفاتورة</h4>
+                        <div style="background: #f5f5f5; padding: 15px; border-radius: 10px;">
+                            ${invoice.invoiceItems.split('\n').map(item => `<p>${item}</p>`).join('')}
                         </div>
+                    </div>
+                    
+                    <div class="row" style="margin-top: 20px;">
+                        <div class="col">
+                            <h4>ملخص المدفوعات</h4>
+                            <p><strong>المبلغ الإجمالي (بدون ضريبة):</strong> ${invoice.subtotal.toFixed(2)} ريال</p>
+                            <p><strong>نسبة الضريبة:</strong> ${invoice.taxRate}%</p>
+                            <p><strong>مبلغ الضريبة:</strong> ${(invoice.subtotal * invoice.taxRate / 100).toFixed(2)} ريال</p>
+                            <p><strong>المبلغ الإجمالي:</strong> <strong style="font-size: 1.2em;">${invoice.totalAmount.toFixed(2)} ريال</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="qrcode-container">
+                        <h4>رمز QR للفاتورة</h4>
+                        <div id="qrcode-${invoice.id}"></div>
+                    </div>
+                    
+                    <div class="invoice-footer">
+                        <p>شكراً لتعاملكم معنا</p>
+                    </div>
+                    
+                    <div class="preview-actions">
+                        <button class="btn btn-success" onclick="printInvoicePreview()">🖨️ طباعة الفاتورة</button>
+                        <button class="btn btn-teal" onclick="saveInvoiceAsPDF(${invoice.id})">📥 حفظ كـ PDF</button>
+                        <button class="btn btn-warning" onclick="closeInvoicePreview()">إغلاق</button>
                     </div>
                 `;
 
-                // إنشاء نافذة عرض الفاتورة
-                const invoiceWindow = window.open('', '_blank', 'width=900,height=700');
-                invoiceWindow.document.write(`
+                // عرض نافذة المعاينة
+                document.getElementById('invoicePreviewContent').innerHTML = html;
+                document.getElementById('invoicePreviewModal').style.display = 'block';
+                
+                // إنشاء QR Code
+                this.generateQRCode(invoice);
+            }
+
+            generateQRCode(invoice) {
+                const qrData = {
+                    invoiceNumber: invoice.invoiceNumber,
+                    clientName: invoice.clientName,
+                    date: invoice.invoiceDate,
+                    totalAmount: invoice.totalAmount.toFixed(2),
+                    status: invoice.invoiceStatus
+                };
+                
+                const qrText = JSON.stringify(qrData);
+                const qrElement = document.getElementById(`qrcode-${invoice.id}`);
+                
+                if (qrElement && typeof QRCode !== 'undefined') {
+                    QRCode.toCanvas(qrElement, qrText, {
+                        width: 150,
+                        margin: 2,
+                        color: {
+                            dark: '#1a237e',
+                            light: '#ffffff'
+                        }
+                    }, function (error) {
+                        if (error) {
+                            console.error('خطأ في إنشاء QR Code:', error);
+                            qrElement.innerHTML = '<p style="color: red;">❌ تعذر إنشاء QR Code</p>';
+                        }
+                    });
+                }
+            }
+
+            printInvoice(id) {
+                const invoice = this.invoices.find(i => i.id === id);
+                if (!invoice) return;
+
+                // إنشاء نافذة طباعة
+                const printWindow = window.open('', '_blank', 'width=800,height=600');
+                printWindow.document.write(`
                     <!DOCTYPE html>
                     <html dir="rtl">
                     <head>
@@ -2041,7 +2154,7 @@
                                 font-family: Arial, sans-serif; 
                                 padding: 20px; 
                                 margin: 0;
-                                background: #f5f5f5;
+                                background: white;
                             }
                             .invoice-preview { 
                                 max-width: 800px; 
@@ -2049,7 +2162,6 @@
                                 background: white; 
                                 padding: 30px; 
                                 border-radius: 15px; 
-                                box-shadow: 0 5px 25px rgba(0,0,0,0.1); 
                             }
                             .invoice-header { 
                                 display: flex; 
@@ -2133,54 +2245,64 @@
                         </style>
                     </head>
                     <body>
-                        ${html}
-                        <br>
-                        <div style="text-align: center; margin-top: 20px;">
-                            <button onclick="window.print()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">🖨️ طباعة</button>
-                            <button onclick="window.close()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">إغلاق</button>
+                        <div class="invoice-preview">
+                            <div class="invoice-header">
+                                <div class="company-info">
+                                    ${invoice.companyLogo ? `<img src="${invoice.companyLogo}" class="company-logo" alt="شعار الشركة">` : ''}
+                                    <div class="company-details">
+                                        ${invoice.companyName ? `<h3>${invoice.companyName}</h3>` : ''}
+                                        <p>${invoice.invoiceDate}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h2>فاتورة #${invoice.invoiceNumber}</h2>
+                                    <p><strong>الحالة:</strong> <span class="badge ${this.getInvoiceStatusClass(invoice.invoiceStatus)}">${this.getInvoiceStatusText(invoice.invoiceStatus)}</span></p>
+                                </div>
+                            </div>
+                            
+                            <div class="row" style="margin-bottom: 20px;">
+                                <div class="col">
+                                    <h4>معلومات العميل</h4>
+                                    <p><strong>اسم العميل:</strong> ${invoice.clientName}</p>
+                                    ${invoice.shipmentNumberInvoice ? `<p><strong>رقم الشحنة:</strong> ${invoice.shipmentNumberInvoice}</p>` : ''}
+                                </div>
+                                <div class="col">
+                                    <h4>معلومات الفاتورة</h4>
+                                    <p><strong>تاريخ الإصدار:</strong> ${invoice.invoiceDate}</p>
+                                    <p><strong>تاريخ الاستحقاق:</strong> ${invoice.dueDate}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <h4>بنود الفاتورة</h4>
+                                <div style="background: #f5f5f5; padding: 15px; border-radius: 10px;">
+                                    ${invoice.invoiceItems.split('\n').map(item => `<p>${item}</p>`).join('')}
+                                </div>
+                            </div>
+                            
+                            <div class="row" style="margin-top: 20px;">
+                                <div class="col">
+                                    <h4>ملخص المدفوعات</h4>
+                                    <p><strong>المبلغ الإجمالي (بدون ضريبة):</strong> ${invoice.subtotal.toFixed(2)} ريال</p>
+                                    <p><strong>نسبة الضريبة:</strong> ${invoice.taxRate}%</p>
+                                    <p><strong>مبلغ الضريبة:</strong> ${(invoice.subtotal * invoice.taxRate / 100).toFixed(2)} ريال</p>
+                                    <p><strong>المبلغ الإجمالي:</strong> <strong style="font-size: 1.2em;">${invoice.totalAmount.toFixed(2)} ريال</strong></p>
+                                </div>
+                            </div>
+                            
+                            <div class="invoice-footer">
+                                <p>شكراً لتعاملكم معنا</p>
+                            </div>
                         </div>
-                        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
-                        <script>
-                            // إنشاء QR Code بعد تحميل الصفحة
-                            window.onload = function() {
-                                const qrData = {
-                                    invoiceNumber: "${invoice.invoiceNumber}",
-                                    clientName: "${invoice.clientName}",
-                                    date: "${invoice.invoiceDate}",
-                                    totalAmount: "${invoice.totalAmount.toFixed(2)}",
-                                    status: "${invoice.invoiceStatus}"
-                                };
-                                
-                                const qrText = JSON.stringify(qrData);
-                                const qrElement = document.getElementById('qrcode-${invoice.id}');
-                                
-                                if (qrElement && typeof QRCode !== 'undefined') {
-                                    QRCode.toCanvas(qrElement, qrText, {
-                                        width: 150,
-                                        margin: 2,
-                                        color: {
-                                            dark: '#1a237e',
-                                            light: '#ffffff'
-                                        }
-                                    }, function (error) {
-                                        if (error) {
-                                            console.error('خطأ في إنشاء QR Code:', error);
-                                            qrElement.innerHTML = '<p style="color: red;">❌ تعذر إنشاء QR Code</p>';
-                                        }
-                                    });
-                                } else {
-                                    console.error('عنصر QR Code غير موجود أو مكتبة QRCode غير محملة');
-                                }
-                            };
-                        <\/script>
                     </body>
                     </html>
                 `);
-                invoiceWindow.document.close();
-            }
-
-            printInvoice(id) {
-                this.viewInvoice(id);
+                printWindow.document.close();
+                
+                // الانتظار قليلاً ثم فتح نافذة الطباعة
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500);
             }
 
             deleteInvoice(id) {
@@ -3550,6 +3672,45 @@
             if (accountSystem) {
                 accountSystem.generatePDF();
             }
+        }
+
+        // دوال جديدة للمعاينة
+        function closeInvoicePreview() {
+            document.getElementById('invoicePreviewModal').style.display = 'none';
+        }
+
+        function printInvoicePreview() {
+            window.print();
+        }
+
+        function saveInvoiceAsPDF(invoiceId) {
+            const { jsPDF } = window.jspdf;
+            const invoice = accountSystem.invoices.find(i => i.id === invoiceId);
+            
+            if (!invoice) return;
+            
+            // استخدام html2canvas لالتقاط المحتوى
+            html2canvas(document.getElementById('invoicePreviewContent')).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`فاتورة-${invoice.invoiceNumber}.pdf`);
+            });
         }
 
         // تهيئة النظام عند تحميل الصفحة
