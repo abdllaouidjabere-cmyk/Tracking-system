@@ -9,6 +9,8 @@
     <!-- إضافة مكتبة jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- إضافة مكتبة دعم العربية لـ jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-arabic@1.1.1/dist/jspdf.arabic.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -2884,11 +2886,16 @@
             }
 
             createPDFDocument(companyName, title, notes, logoBase64) {
-                // إنشاء مستند PDF جديد
+                // إنشاء مستند PDF جديد مع دعم العربية
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // إعدادات المستند
+                // تفعيل دعم اللغة العربية
+                if (typeof doc.processArabic !== 'undefined') {
+                    doc.processArabic();
+                }
+                
+                // إعدادات المستند للغة العربية
                 doc.setR2L(true); // للغة العربية
                 doc.setFont('Times', 'normal');
                 
@@ -2956,6 +2963,11 @@
             }
 
             addShipmentsToPDF(doc, yPosition) {
+                // استخدام الخط العربي
+                if (typeof doc.setFontArabic !== 'undefined') {
+                    doc.setFontArabic('times');
+                }
+                
                 // عنوان القسم
                 doc.setFontSize(16);
                 doc.setTextColor(26, 35, 126); // لون أزرق داكن
@@ -3000,6 +3012,11 @@
             }
 
             addInvoicesToPDF(doc, yPosition) {
+                // استخدام الخط العربي
+                if (typeof doc.setFontArabic !== 'undefined') {
+                    doc.setFontArabic('times');
+                }
+                
                 // عنوان القسم
                 doc.setFontSize(16);
                 doc.setTextColor(26, 35, 126); // لون أزرق داكن
@@ -3046,6 +3063,11 @@
             }
 
             addNamesToPDF(doc, yPosition) {
+                // استخدام الخط العربي
+                if (typeof doc.setFontArabic !== 'undefined') {
+                    doc.setFontArabic('times');
+                }
+                
                 // عنوان القسم
                 doc.setFontSize(16);
                 doc.setTextColor(26, 35, 126); // لون أزرق داكن
@@ -3099,6 +3121,11 @@
             }
 
             addInventoryToPDF(doc, yPosition) {
+                // استخدام الخط العربي
+                if (typeof doc.setFontArabic !== 'undefined') {
+                    doc.setFontArabic('times');
+                }
+                
                 // عنوان القسم
                 doc.setFontSize(16);
                 doc.setTextColor(26, 35, 126); // لون أزرق داكن
@@ -3153,6 +3180,11 @@
             }
 
             addSingleShipmentToPDF(doc, yPosition) {
+                // استخدام الخط العربي
+                if (typeof doc.setFontArabic !== 'undefined') {
+                    doc.setFontArabic('times');
+                }
+                
                 const shipment = this.currentExportData;
                 
                 // عنوان القسم
