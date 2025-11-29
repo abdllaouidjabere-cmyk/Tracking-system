@@ -9,8 +9,6 @@
     <!-- إضافة مكتبة jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- إضافة مكتبة دعم العربية لـ jsPDF -->
-    <script src="https://cdn.jsdelivr.net/npm/jspdf-arabic@1.1.1/dist/jspdf.arabic.min.js"></script>
     <style>
         /* جميع الأنماط السابقة تبقى كما هي */
         * {
@@ -720,6 +718,23 @@
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
+        /* تنسيقات خاصة للطباعة */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .invoice-preview, .invoice-preview * {
+                visibility: visible;
+            }
+            .invoice-preview {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                box-shadow: none;
+            }
+        }
+        
         @media (max-width: 768px) {
             .nav-tab {
                 flex: 100%;
@@ -1386,7 +1401,7 @@
     </div>
 
     <script>
-        // نظام "حساباتك" المتكامل - JavaScript الكامل مع إصلاح مشكلة تصدير PDF
+        // نظام "حساباتك" المتكامل - JavaScript الكامل مع إصلاح شامل لمشكلة PDF
         class AccountSystem {
             constructor() {
                 this.shipments = JSON.parse(localStorage.getItem('shipments')) || [];
@@ -2887,12 +2902,13 @@
             }
 
             createPDFDocument(companyName, title, notes, logoBase64) {
-                // استخدام مكتبة jsPDF مع دعم العربية
+                // استخدام مكتبة jsPDF
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // إعدادات المستند للغة العربية
-                doc.setR2L(true);
+                // إعدادات المستند
+                doc.setFontSize(20);
+                doc.setTextColor(26, 35, 126);
                 
                 // إضافة الشعار إذا كان موجوداً
                 let yPosition = 20;
@@ -2901,8 +2917,6 @@
                 }
                 
                 // عنوان التقرير
-                doc.setFontSize(20);
-                doc.setTextColor(26, 35, 126);
                 doc.text(title || 'تقرير', 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
