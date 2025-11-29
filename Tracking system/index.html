@@ -12,6 +12,7 @@
     <!-- إضافة مكتبة دعم العربية لـ jsPDF -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf-arabic@1.1.1/dist/jspdf.arabic.min.js"></script>
     <style>
+        /* جميع الأنماط السابقة تبقى كما هي */
         * {
             margin: 0;
             padding: 0;
@@ -1385,7 +1386,7 @@
     </div>
 
     <script>
-        // نظام "حساباتك" المتكامل - JavaScript الكامل مع إضافة الأطراف المتعددة
+        // نظام "حساباتك" المتكامل - JavaScript الكامل مع إصلاح مشكلة تصدير PDF
         class AccountSystem {
             constructor() {
                 this.shipments = JSON.parse(localStorage.getItem('shipments')) || [];
@@ -2886,18 +2887,12 @@
             }
 
             createPDFDocument(companyName, title, notes, logoBase64) {
-                // إنشاء مستند PDF جديد مع دعم العربية
+                // استخدام مكتبة jsPDF مع دعم العربية
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // تفعيل دعم اللغة العربية
-                if (typeof doc.processArabic !== 'undefined') {
-                    doc.processArabic();
-                }
-                
                 // إعدادات المستند للغة العربية
-                doc.setR2L(true); // للغة العربية
-                doc.setFont('Times', 'normal');
+                doc.setR2L(true);
                 
                 // إضافة الشعار إذا كان موجوداً
                 let yPosition = 20;
@@ -2907,19 +2902,19 @@
                 
                 // عنوان التقرير
                 doc.setFontSize(20);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text(title || 'تقرير', 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
                 // اسم الشركة
                 doc.setFontSize(16);
-                doc.setTextColor(57, 73, 171); // لون أزرق متوسط
+                doc.setTextColor(57, 73, 171);
                 doc.text(companyName, 105, yPosition, { align: 'center' });
                 yPosition += 10;
                 
                 // تاريخ التقرير
                 doc.setFontSize(12);
-                doc.setTextColor(100, 100, 100); // لون رمادي
+                doc.setTextColor(100, 100, 100);
                 const today = new Date().toLocaleDateString('ar-SA');
                 doc.text(`تاريخ التقرير: ${today}`, 105, yPosition, { align: 'center' });
                 yPosition += 20;
@@ -2927,7 +2922,7 @@
                 // ملاحظات إضافية إذا كانت موجودة
                 if (notes) {
                     doc.setFontSize(12);
-                    doc.setTextColor(0, 0, 0); // لون أسود
+                    doc.setTextColor(0, 0, 0);
                     const splitNotes = doc.splitTextToSize(notes, 180);
                     doc.text(splitNotes, 105, yPosition, { align: 'center' });
                     yPosition += splitNotes.length * 7 + 10;
@@ -2963,21 +2958,16 @@
             }
 
             addShipmentsToPDF(doc, yPosition) {
-                // استخدام الخط العربي
-                if (typeof doc.setFontArabic !== 'undefined') {
-                    doc.setFontArabic('times');
-                }
-                
                 // عنوان القسم
                 doc.setFontSize(16);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text('قائمة الشحنات', 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
                 // رؤوس الجدول
                 doc.setFontSize(10);
-                doc.setTextColor(255, 255, 255); // لون أبيض
-                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.setTextColor(255, 255, 255);
+                doc.setFillColor(26, 35, 126);
                 doc.rect(10, yPosition, 190, 10, 'F');
                 doc.text('رقم الشحنة', 190, yPosition + 7, { align: 'right' });
                 doc.text('عدد الأطراف', 150, yPosition + 7, { align: 'right' });
@@ -2986,7 +2976,7 @@
                 yPosition += 15;
                 
                 // بيانات الشحنات
-                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setTextColor(0, 0, 0);
                 doc.setFontSize(9);
                 
                 this.shipments.forEach((shipment, index) => {
@@ -3012,21 +3002,16 @@
             }
 
             addInvoicesToPDF(doc, yPosition) {
-                // استخدام الخط العربي
-                if (typeof doc.setFontArabic !== 'undefined') {
-                    doc.setFontArabic('times');
-                }
-                
                 // عنوان القسم
                 doc.setFontSize(16);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text('قائمة الفواتير', 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
                 // رؤوس الجدول
                 doc.setFontSize(10);
-                doc.setTextColor(255, 255, 255); // لون أبيض
-                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.setTextColor(255, 255, 255);
+                doc.setFillColor(26, 35, 126);
                 doc.rect(10, yPosition, 190, 10, 'F');
                 doc.text('رقم الفاتورة', 190, yPosition + 7, { align: 'right' });
                 doc.text('اسم العميل', 150, yPosition + 7, { align: 'right' });
@@ -3036,7 +3021,7 @@
                 yPosition += 15;
                 
                 // بيانات الفواتير
-                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setTextColor(0, 0, 0);
                 doc.setFontSize(9);
                 
                 this.invoices.forEach((invoice, index) => {
@@ -3063,21 +3048,16 @@
             }
 
             addNamesToPDF(doc, yPosition) {
-                // استخدام الخط العربي
-                if (typeof doc.setFontArabic !== 'undefined') {
-                    doc.setFontArabic('times');
-                }
-                
                 // عنوان القسم
                 doc.setFontSize(16);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text('قائمة الأسماء', 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
                 // رؤوس الجدول
                 doc.setFontSize(10);
-                doc.setTextColor(255, 255, 255); // لون أبيض
-                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.setTextColor(255, 255, 255);
+                doc.setFillColor(26, 35, 126);
                 doc.rect(10, yPosition, 190, 10, 'F');
                 doc.text('النوع', 190, yPosition + 7, { align: 'right' });
                 doc.text('الاسم الكامل', 150, yPosition + 7, { align: 'right' });
@@ -3087,7 +3067,7 @@
                 yPosition += 15;
                 
                 // بيانات الأسماء
-                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setTextColor(0, 0, 0);
                 doc.setFontSize(9);
                 
                 const nameTypes = {
@@ -3121,21 +3101,16 @@
             }
 
             addInventoryToPDF(doc, yPosition) {
-                // استخدام الخط العربي
-                if (typeof doc.setFontArabic !== 'undefined') {
-                    doc.setFontArabic('times');
-                }
-                
                 // عنوان القسم
                 doc.setFontSize(16);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text('قائمة المخزون', 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
                 // رؤوس الجدول
                 doc.setFontSize(10);
-                doc.setTextColor(255, 255, 255); // لون أبيض
-                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.setTextColor(255, 255, 255);
+                doc.setFillColor(26, 35, 126);
                 doc.rect(10, yPosition, 190, 10, 'F');
                 doc.text('اسم المنتج', 190, yPosition + 7, { align: 'right' });
                 doc.text('كود المنتج', 150, yPosition + 7, { align: 'right' });
@@ -3146,7 +3121,7 @@
                 yPosition += 15;
                 
                 // بيانات المخزون
-                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setTextColor(0, 0, 0);
                 doc.setFontSize(9);
                 
                 const statusText = {
@@ -3180,22 +3155,17 @@
             }
 
             addSingleShipmentToPDF(doc, yPosition) {
-                // استخدام الخط العربي
-                if (typeof doc.setFontArabic !== 'undefined') {
-                    doc.setFontArabic('times');
-                }
-                
                 const shipment = this.currentExportData;
                 
                 // عنوان القسم
                 doc.setFontSize(16);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text(`تفاصيل الشحنة: ${shipment.shipmentNumber}`, 105, yPosition, { align: 'center' });
                 yPosition += 15;
                 
                 // معلومات الشحنة
                 doc.setFontSize(12);
-                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setTextColor(0, 0, 0);
                 doc.text(`رقم الشحنة: ${shipment.shipmentNumber}`, 190, yPosition, { align: 'right' });
                 yPosition += 8;
                 doc.text(`عدد الأطراف: ${shipment.parties.length}`, 190, yPosition, { align: 'right' });
@@ -3207,14 +3177,14 @@
                 
                 // عنوان قائمة الأطراف
                 doc.setFontSize(14);
-                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.setTextColor(26, 35, 126);
                 doc.text('قائمة الأطراف', 105, yPosition, { align: 'center' });
                 yPosition += 10;
                 
                 // رؤوس جدول الأطراف
                 doc.setFontSize(10);
-                doc.setTextColor(255, 255, 255); // لون أبيض
-                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.setTextColor(255, 255, 255);
+                doc.setFillColor(26, 35, 126);
                 doc.rect(10, yPosition, 190, 10, 'F');
                 doc.text('اسم الطرف', 190, yPosition + 7, { align: 'right' });
                 doc.text('نوع الطرف', 150, yPosition + 7, { align: 'right' });
@@ -3224,7 +3194,7 @@
                 yPosition += 15;
                 
                 // بيانات الأطراف
-                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setTextColor(0, 0, 0);
                 doc.setFontSize(9);
                 
                 shipment.parties.forEach((party, index) => {
