@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تتبع الحمولة والفواتير</title>
+    <title>حساباتك - نظام إدارة متكامل</title>
+    <!-- إضافة مكتبة QR Code -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <!-- إضافة مكتبة jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,13 +18,13 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #303f9f 100%);
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -34,7 +39,7 @@
         }
         
         .header {
-            background: linear-gradient(135deg, #0f4c75 0%, #3282b8 100%);
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
             color: white;
             padding: 35px;
             text-align: center;
@@ -54,7 +59,7 @@
         }
         
         .header h1 {
-            font-size: 2.8em;
+            font-size: 3em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             position: relative;
@@ -67,7 +72,7 @@
         }
         
         .nav {
-            background: linear-gradient(to right, #0f4c75, #3282b8);
+            background: linear-gradient(to right, #1a237e, #283593);
             padding: 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
@@ -90,6 +95,7 @@
             font-weight: bold;
             position: relative;
             overflow: hidden;
+            min-width: 150px;
         }
         
         .nav-tab::before {
@@ -113,8 +119,8 @@
         }
         
         .nav-tab.active {
-            background: #1b5e20;
-            border-bottom: 4px solid #4caf50;
+            background: #0d47a1;
+            border-bottom: 4px solid #5c6bc0;
             box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
         }
         
@@ -143,29 +149,29 @@
             display: block;
             margin-bottom: 10px;
             font-weight: bold;
-            color: #0f4c75;
+            color: #1a237e;
             font-size: 1.15em;
         }
         
         .form-control {
             width: 100%;
             padding: 14px 18px;
-            border: 2px solid #bbdefb;
+            border: 2px solid #c5cae9;
             border-radius: 10px;
             font-size: 1.05em;
             transition: all 0.3s ease;
-            background: #f1f8ff;
+            background: #f1f3ff;
         }
         
         .form-control:focus {
-            border-color: #2196f3;
+            border-color: #3949ab;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+            box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.2);
             background: white;
         }
         
         .btn {
-            background: linear-gradient(to right, #2196f3, #1976d2);
+            background: linear-gradient(to right, #3949ab, #283593);
             color: white;
             border: none;
             padding: 16px 32px;
@@ -217,7 +223,7 @@
         }
         
         .btn-success {
-            background: linear-gradient(to right, #4caf50, #2e7d32);
+            background: linear-gradient(to right, #43a047, #2e7d32);
         }
         
         .btn-warning {
@@ -225,11 +231,15 @@
         }
         
         .btn-danger {
-            background: linear-gradient(to right, #f44336, #c62828);
+            background: linear-gradient(to right, #e53935, #c62828);
         }
         
         .btn-purple {
-            background: linear-gradient(to right, #9c27b0, #6a1b9a);
+            background: linear-gradient(to right, #7e57c2, #5e35b1);
+        }
+        
+        .btn-teal {
+            background: linear-gradient(to right, #009688, #00796b);
         }
         
         .alert {
@@ -276,7 +286,7 @@
             min-width: 320px;
         }
         
-        .shipment-card, .invoice-card {
+        .shipment-card, .invoice-card, .name-card, .inventory-card {
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 15px;
@@ -288,22 +298,22 @@
             overflow: hidden;
         }
         
-        .shipment-card::before, .invoice-card::before {
+        .shipment-card::before, .invoice-card::before, .name-card::before, .inventory-card::before {
             content: "";
             position: absolute;
             top: 0;
             right: 0;
             width: 5px;
             height: 100%;
-            background: #2196f3;
+            background: #3949ab;
             transition: width 0.3s;
         }
         
-        .shipment-card:hover::before, .invoice-card:hover::before {
+        .shipment-card:hover::before, .invoice-card:hover::before, .name-card:hover::before, .inventory-card:hover::before {
             width: 8px;
         }
         
-        .shipment-card:hover, .invoice-card:hover {
+        .shipment-card:hover, .invoice-card:hover, .name-card:hover, .inventory-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
@@ -321,7 +331,7 @@
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-left: 5px solid #2196f3;
+            border-left: 5px solid #3949ab;
             transition: transform 0.3s;
         }
         
@@ -332,7 +342,7 @@
         .stat-number {
             font-size: 2.8em;
             font-weight: bold;
-            color: #0f4c75;
+            color: #1a237e;
             margin-bottom: 10px;
         }
         
@@ -369,7 +379,7 @@
             border-radius: 15px;
             margin: 25px 0;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border-right: 5px solid #2196f3;
+            border-right: 5px solid #3949ab;
         }
         
         .actions {
@@ -379,7 +389,7 @@
             flex-wrap: wrap;
         }
         
-        .invoice-form {
+        .invoice-form, .name-form, .inventory-form {
             background: white;
             padding: 25px;
             border-radius: 15px;
@@ -387,7 +397,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         
-        .invoice-table {
+        .invoice-table, .name-table, .inventory-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
@@ -396,24 +406,24 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         
-        .invoice-table th {
-            background: #0f4c75;
+        .invoice-table th, .name-table th, .inventory-table th {
+            background: #1a237e;
             color: white;
             padding: 15px;
             text-align: right;
         }
         
-        .invoice-table td {
+        .invoice-table td, .name-table td, .inventory-table td {
             padding: 12px 15px;
             border-bottom: 1px solid #e0e0e0;
         }
         
-        .invoice-table tr:nth-child(even) {
+        .invoice-table tr:nth-child(even), .name-table tr:nth-child(even), .inventory-table tr:nth-child(even) {
             background: #f5f5f5;
         }
         
-        .invoice-table tr:hover {
-            background: #e3f2fd;
+        .invoice-table tr:hover, .name-table tr:hover, .inventory-table tr:hover {
+            background: #e8eaf6;
         }
         
         .invoice-total {
@@ -436,7 +446,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             text-align: center;
             transition: transform 0.3s;
-            border-top: 5px solid #2196f3;
+            border-top: 5px solid #3949ab;
         }
         
         .dashboard-card:hover {
@@ -444,7 +454,7 @@
         }
         
         .dashboard-card h3 {
-            color: #0f4c75;
+            color: #1a237e;
             margin-bottom: 15px;
             font-size: 1.4em;
         }
@@ -457,7 +467,254 @@
         .dashboard-icon {
             font-size: 3em;
             margin-bottom: 15px;
-            color: #2196f3;
+            color: #3949ab;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #c5cae9;
+            border-radius: 10px 0 0 10px;
+            font-size: 1.05em;
+        }
+        
+        .search-box button {
+            background: #3949ab;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 0 10px 10px 0;
+            cursor: pointer;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .badge-warning {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .badge-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        /* تنسيقات إضافية للفواتير */
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .company-logo {
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .company-details h3 {
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+        
+        .qrcode-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .qrcode-container canvas {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .invoice-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+        }
+        
+        /* تنسيقات جديدة للأطراف المتعددة */
+        .party-form {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .party-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .party-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: #3949ab;
+            transition: width 0.3s;
+        }
+        
+        .party-card:hover::before {
+            width: 8px;
+        }
+        
+        .party-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .party-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .party-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .party-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .party-detail {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .party-detail strong {
+            color: #1a237e;
+        }
+        
+        /* نافذة التصدير إلى PDF */
+        .pdf-export-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .pdf-export-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .pdf-export-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .pdf-export-header h3 {
+            color: #1a237e;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .close-modal:hover {
+            color: #f44336;
+        }
+        
+        .preview-logo {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 10px auto;
+            display: block;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
         @media (max-width: 768px) {
@@ -490,21 +747,43 @@
             .tab-content {
                 padding: 20px;
             }
+            
+            .invoice-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .company-info {
+                flex-direction: column;
+                margin-bottom: 20px;
+            }
+            
+            .party-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .party-actions {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📦 نظام تتبع الحمولة والفواتير</h1>
-            <p>نظام متكامل لمتابعة الحمولات وإدارة الفواتير</p>
+            <h1>حساباتك - نظام إدارة متكامل</h1>
+            <p>نظام متكامل لإدارة الحمولات، الفواتير، المخزون، والموارد البشرية</p>
         </div>
         
         <nav class="nav">
             <ul class="nav-tabs">
                 <li class="nav-tab active" onclick="openTab('home')">🏠 الرئيسية</li>
-                <li class="nav-tab" onclick="openTab('party1')">👤 الطرف الأول</li>
-                <li class="nav-tab" onclick="openTab('party2')">👥 الطرف الثاني</li>
+                <li class="nav-tab" onclick="openTab('parties')">👥 إدخال بيانات الأطراف</li>
+                <li class="nav-tab" onclick="openTab('inventory')">📦 إدارة المخزون</li>
+                <li class="nav-tab" onclick="openTab('names')">👥 إدارة الأسماء</li>
                 <li class="nav-tab" onclick="openTab('invoices')">🧾 الفواتير</li>
                 <li class="nav-tab" onclick="openTab('reports')">📊 التقارير</li>
                 <li class="nav-tab" onclick="openTab('settings')">⚙️ الإعدادات</li>
@@ -513,8 +792,8 @@
 
         <!-- الصفحة الرئيسية -->
         <div id="home" class="tab-content active">
-            <h2>مرحباً بك في نظام تتبع الحمولة والفواتير</h2>
-            <p>هذا النظام يمكنك من تتبع ومقارنة بيانات الحمولات بين الطرفين وإدارة الفواتير بشكل متكامل.</p>
+            <h2>مرحباً بك في نظام "حساباتك" المتكامل</h2>
+            <p>هذا النظام يمكنك من إدارة جميع جوانب عملك بشكل متكامل ومحترف.</p>
             
             <div class="stats">
                 <div class="stat-card">
@@ -526,28 +805,36 @@
                     <div class="stat-label">الشحنات النشطة</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="completedShipments">0</div>
-                    <div class="stat-label">الشحنات المكتملة</div>
-                </div>
-                <div class="stat-card">
                     <div class="stat-number" id="totalInvoices">0</div>
                     <div class="stat-label">إجمالي الفواتير</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalInventory">0</div>
+                    <div class="stat-label">عناصر المخزون</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalEmployees">0</div>
+                    <div class="stat-label">الموظفين</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalSuppliers">0</div>
+                    <div class="stat-label">الموردين</div>
                 </div>
             </div>
 
             <div class="dashboard-cards">
                 <div class="dashboard-card">
-                    <div class="dashboard-icon">👤</div>
-                    <h3>إدارة الطرف الأول</h3>
+                    <div class="dashboard-icon">👥</div>
+                    <h3>إدارة الأطراف</h3>
                     <p>أدخل بيانات الحمولة بشكل آمن ومحمي</p>
-                    <button class="btn" onclick="openTab('party1')">بدء إدخال البيانات</button>
+                    <button class="btn" onclick="openTab('parties')">بدء إدخال البيانات</button>
                 </div>
                 
                 <div class="dashboard-card">
-                    <div class="dashboard-icon">👥</div>
-                    <h3>إدارة الطرف الثاني</h3>
-                    <p>أدخل بياناتك باستخدام نفس رقم الشحنة</p>
-                    <button class="btn" onclick="openTab('party2')">بدء إدخال البيانات</button>
+                    <div class="dashboard-icon">📦</div>
+                    <h3>إدارة المخزون</h3>
+                    <p>إدارة المخزون بشكل متكامل ومحترف</p>
+                    <button class="btn btn-teal" onclick="openTab('inventory')">الدخول إلى المخزون</button>
                 </div>
                 
                 <div class="dashboard-card">
@@ -556,104 +843,319 @@
                     <p>إنشاء وإدارة فواتير الشحنات</p>
                     <button class="btn btn-purple" onclick="openTab('invoices')">الدخول إلى الفواتير</button>
                 </div>
+                
+                <div class="dashboard-card">
+                    <div class="dashboard-icon">📊</div>
+                    <h3>التقارير والإحصائيات</h3>
+                    <p>عرض التقارير والإحصائيات المتقدمة</p>
+                    <button class="btn btn-success" onclick="openTab('reports')">الدخول إلى التقارير</button>
+                </div>
             </div>
 
-            <div class="shipment-card" style="background: #e8f4fd; border-left: 5px solid #2196f3;">
+            <div class="shipment-card" style="background: #e8eaf6; border-left: 5px solid #3949ab;">
                 <h3>👑 للمديرين والمشرفين</h3>
                 <p>الوصول الكامل إلى جميع البيانات والتقارير والفواتير</p>
                 <ul>
                     <li>📊 مشاهدة جميع الشحنات والنتائج</li>
-                    <li>🔍 مقارنة البيانات بين الطرفين</li>
+                    <li>🔍 مقارنة البيانات بين الأطراف</li>
+                    <li>📦 إدارة المخزون المتكامل</li>
+                    <li>👥 إدارة قاعدة بيانات الأسماء</li>
                     <li>🧾 إدارة نظام الفواتير المتكامل</li>
                     <li>🗑️ إمكانية حذف الشحنات والفواتير</li>
-                    <li>📥 تصدير البيانات إلى Excel</li>
+                    <li>📥 تصدير البيانات إلى PDF</li>
                     <li>🔐 نظام حماية بكلمة مرور</li>
                 </ul>
-                <button class="btn btn-success" onclick="openTab('reports')" style="margin-top: 15px;">الدخول إلى التقارير</button>
             </div>
         </div>
 
-        <!-- صفحة الطرف الأول -->
-        <div id="party1" class="tab-content">
-            <h2>👤 إدخال بيانات الطرف الأول</h2>
-            <form id="party1Form">
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="shipmentNumber1">رقم الشحنة *</label>
-                            <input type="text" id="shipmentNumber1" class="form-control" required 
-                                   placeholder="مثال: SH-2024-001">
-                        </div>
-                        <div class="form-group">
-                            <label for="weight1">الوزن (كجم) *</label>
-                            <input type="number" id="weight1" class="form-control" step="0.1" required 
-                                   placeholder="أدخل الوزن بالكيلوجرام">
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="party1Name">اسم الطرف الأول *</label>
-                            <input type="text" id="party1Name" class="form-control" required 
-                                   placeholder="اسم الشركة أو الشخص">
-                        </div>
-                        <div class="form-group">
-                            <label for="details1">تفاصيل الحمولة *</label>
-                            <textarea id="details1" class="form-control" rows="4" required 
-                                      placeholder="وصف تفصيلي للحمولة..."></textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="alert alert-warning">
-                    🔒 <strong>ملاحظة أمنية:</strong><br>
-                    بياناتك محمية بالكامل. الطرف الثاني <strong>لن يتمكن</strong> من رؤية أي من هذه البيانات.
-                </div>
-                
-                <button type="submit" class="btn btn-success">💾 حفظ بيانات الطرف الأول</button>
-            </form>
-            <div id="party1Message"></div>
-        </div>
-
-        <!-- صفحة الطرف الثاني -->
-        <div id="party2" class="tab-content">
-            <h2>👥 إدخال بيانات الطرف الثاني</h2>
+        <!-- صفحة إدخال بيانات الأطراف -->
+        <div id="parties" class="tab-content">
+            <h2>👥 إدخال بيانات الأطراف</h2>
             
-            <div class="alert alert-warning">
-                🔒 <strong>تنبيه الخصوصية:</strong><br>
-                يمكنك إدخال بياناتك فقط. <strong>لن تتمكن من رؤية أي بيانات للطرف الأول</strong>.
+            <div class="alert alert-info">
+                💡 <strong>ميزة جديدة:</strong> يمكنك الآن إضافة أي عدد من الأطراف للشحنة الواحدة
             </div>
             
-            <form id="party2Form">
-                <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="shipmentNumber2">رقم الشحنة *</label>
-                            <input type="text" id="shipmentNumber2" class="form-control" required 
-                                   placeholder="أدخل رقم الشحنة">
+            <div class="party-form">
+                <h3>إضافة طرف جديد</h3>
+                <form id="partyForm">
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="shipmentNumber">رقم الشحنة *</label>
+                                <input type="text" id="shipmentNumber" class="form-control" required 
+                                       placeholder="مثال: SH-2024-001">
+                            </div>
+                            <div class="form-group">
+                                <label for="partyName">اسم الطرف *</label>
+                                <input type="text" id="partyName" class="form-control" required 
+                                       placeholder="اسم الشركة أو الشخص">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="weight2">الوزن (كجم) *</label>
-                            <input type="number" id="weight2" class="form-control" step="0.1" required
-                                   placeholder="أدخل الوزن كما تم قياسه">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="weight">الوزن (كجم) *</label>
+                                <input type="number" id="weight" class="form-control" step="0.1" required 
+                                       placeholder="أدخل الوزن بالكيلوجرام">
+                            </div>
+                            <div class="form-group">
+                                <label for="units">عدد الوحدات *</label>
+                                <input type="number" id="units" class="form-control" required 
+                                       placeholder="عدد الوحدات">
+                            </div>
                         </div>
                     </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <label for="party2Name">اسم الطرف الثاني *</label>
-                            <input type="text" id="party2Name" class="form-control" required
-                                   placeholder="اسم الشركة أو الشخص">
+                    
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="partyType">نوع الطرف *</label>
+                                <select id="partyType" class="form-control" required>
+                                    <option value="">اختر نوع الطرف</option>
+                                    <option value="sender">مرسل</option>
+                                    <option value="receiver">مستلم</option>
+                                    <option value="shipper">شاحن</option>
+                                    <option value="carrier">ناقل</option>
+                                    <option value="supplier">مورد</option>
+                                    <option value="other">آخر</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="details2">تفاصيل الحمولة *</label>
-                            <textarea id="details2" class="form-control" rows="4" required
-                                      placeholder="وصف تفصيلي للحمولة كما تم فحصها..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="details">تفاصيل الحمولة *</label>
+                        <textarea id="details" class="form-control" rows="4" required 
+                                  placeholder="وصف تفصيلي للحمولة..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">💾 حفظ بيانات الطرف</button>
+                </form>
+                <div id="partyMessage"></div>
+            </div>
+            
+            <div id="partiesList"></div>
+        </div>
+
+        <!-- صفحة إدارة المخزون -->
+        <div id="inventory" class="tab-content">
+            <h2>📦 إدارة المخزون المتكامل</h2>
+            
+            <div class="password-section">
+                <h3>🔐 التحقق من الهوية</h3>
+                <div class="form-group">
+                    <label for="inventoryPassword">كلمة المرور *</label>
+                    <input type="password" id="inventoryPassword" class="form-control" 
+                           placeholder="أدخل كلمة المرور للوصول إلى نظام المخزون">
+                </div>
+                <button onclick="loadInventory()" class="btn btn-teal">🔓 فتح نظام المخزون</button>
+            </div>
+            
+            <div id="inventoryContent" style="display: none;">
+                <div class="actions">
+                    <button onclick="showInventoryForm()" class="btn btn-success">➕ إضافة منتج جديد</button>
+                    <button onclick="exportInventoryToPDF()" class="btn">📥 تصدير المخزون (PDF)</button>
+                    <button onclick="deleteAllInventory()" class="btn btn-danger">🗑️ حذف جميع المنتجات</button>
+                </div>
+                
+                <div class="filter-section">
+                    <div class="search-box">
+                        <input type="text" id="inventorySearch" placeholder="ابحث عن منتج...">
+                        <button onclick="searchInventory()">🔍</button>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="filterCategory">تصفية حسب الفئة:</label>
+                                <select id="filterCategory" class="form-control" onchange="filterInventory()">
+                                    <option value="all">جميع الفئات</option>
+                                    <option value="electronics">إلكترونيات</option>
+                                    <option value="clothing">ملابس</option>
+                                    <option value="food">مواد غذائية</option>
+                                    <option value="tools">أدوات</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="filterStatus">تصفية حسب الحالة:</label>
+                                <select id="filterStatus" class="form-control" onchange="filterInventory()">
+                                    <option value="all">جميع الحالات</option>
+                                    <option value="in_stock">متوفر</option>
+                                    <option value="low_stock">كمية قليلة</option>
+                                    <option value="out_of_stock">غير متوفر</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-success">💾 حفظ بيانات الطرف الثاني</button>
-            </form>
-            <div id="party2Message"></div>
+                <div class="inventory-form" id="inventoryForm" style="display: none;">
+                    <h3>إضافة منتج جديد للمخزون</h3>
+                    <form id="newInventoryForm">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="productName">اسم المنتج *</label>
+                                    <input type="text" id="productName" class="form-control" required 
+                                           placeholder="اسم المنتج">
+                                </div>
+                                <div class="form-group">
+                                    <label for="productCode">كود المنتج *</label>
+                                    <input type="text" id="productCode" class="form-control" required 
+                                           placeholder="كود المنتج">
+                                </div>
+                                <div class="form-group">
+                                    <label for="productCategory">فئة المنتج *</label>
+                                    <select id="productCategory" class="form-control" required>
+                                        <option value="">اختر الفئة</option>
+                                        <option value="electronics">إلكترونيات</option>
+                                        <option value="clothing">ملابس</option>
+                                        <option value="food">مواد غذائية</option>
+                                        <option value="tools">أدوات</option>
+                                        <option value="other">أخرى</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="productQuantity">الكمية *</label>
+                                    <input type="number" id="productQuantity" class="form-control" required 
+                                           placeholder="الكمية المتوفرة">
+                                </div>
+                                <div class="form-group">
+                                    <label for="productPrice">سعر الشراء *</label>
+                                    <input type="number" id="productPrice" class="form-control" step="0.01" required 
+                                           placeholder="سعر الشراء">
+                                </div>
+                                <div class="form-group">
+                                    <label for="sellingPrice">سعر البيع *</label>
+                                    <input type="number" id="sellingPrice" class="form-control" step="0.01" required 
+                                           placeholder="سعر البيع">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productDescription">وصف المنتج</label>
+                            <textarea id="productDescription" class="form-control" rows="3" 
+                                      placeholder="وصف المنتج..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="supplierName">اسم المورد</label>
+                            <input type="text" id="supplierName" class="form-control" 
+                                   placeholder="اسم المورد">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">💾 حفظ المنتج</button>
+                        <button type="button" class="btn btn-danger" onclick="hideInventoryForm()">❌ إلغاء</button>
+                    </form>
+                    <div id="inventoryMessage"></div>
+                </div>
+                
+                <div id="inventoryList"></div>
+            </div>
+        </div>
+
+        <!-- صفحة إدارة الأسماء -->
+        <div id="names" class="tab-content">
+            <h2>👥 إدارة الأسماء (الموظفين، المشرفين، الشركاء، الموردين)</h2>
+            
+            <div class="password-section">
+                <h3>🔐 التحقق من الهوية</h3>
+                <div class="form-group">
+                    <label for="namesPassword">كلمة المرور *</label>
+                    <input type="password" id="namesPassword" class="form-control" 
+                           placeholder="أدخل كلمة المرور للوصول إلى نظام إدارة الأسماء">
+                </div>
+                <button onclick="loadNames()" class="btn btn-purple">🔓 فتح نظام إدارة الأسماء</button>
+            </div>
+            
+            <div id="namesContent" style="display: none;">
+                <div class="actions">
+                    <button onclick="showNameForm()" class="btn btn-success">➕ إضافة اسم جديد</button>
+                    <button onclick="exportNamesToPDF()" class="btn">📥 تصدير الأسماء (PDF)</button>
+                    <button onclick="deleteAllNames()" class="btn btn-danger">🗑️ حذف جميع الأسماء</button>
+                </div>
+                
+                <div class="filter-section">
+                    <div class="search-box">
+                        <input type="text" id="namesSearch" placeholder="ابحث عن اسم...">
+                        <button onclick="searchNames()">🔍</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="filterNameType">تصفية حسب النوع:</label>
+                        <select id="filterNameType" class="form-control" onchange="filterNames()">
+                            <option value="all">جميع الأنواع</option>
+                            <option value="employee">موظف</option>
+                            <option value="supervisor">مشرف</option>
+                            <option value="partner">شريك</option>
+                            <option value="supplier">مورد</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="name-form" id="nameForm" style="display: none;">
+                    <h3>إضافة اسم جديد</h3>
+                    <form id="newNameForm">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="nameType">نوع الاسم *</label>
+                                    <select id="nameType" class="form-control" required>
+                                        <option value="">اختر نوع الاسم</option>
+                                        <option value="employee">موظف</option>
+                                        <option value="supervisor">مشرف</option>
+                                        <option value="partner">شريك</option>
+                                        <option value="supplier">مورد</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fullName">الاسم الكامل *</label>
+                                    <input type="text" id="fullName" class="form-control" required 
+                                           placeholder="الاسم الكامل">
+                                </div>
+                                <div class="form-group">
+                                    <label for="phoneNumber">رقم الهاتف</label>
+                                    <input type="text" id="phoneNumber" class="form-control" 
+                                           placeholder="رقم الهاتف">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="email">البريد الإلكتروني</label>
+                                    <input type="email" id="email" class="form-control" 
+                                           placeholder="البريد الإلكتروني">
+                                </div>
+                                <div class="form-group">
+                                    <label for="position">المنصب / المسمى الوظيفي</label>
+                                    <input type="text" id="position" class="form-control" 
+                                           placeholder="المنصب أو المسمى الوظيفي">
+                                </div>
+                                <div class="form-group">
+                                    <label for="department">القسم / الإدارة</label>
+                                    <input type="text" id="department" class="form-control" 
+                                           placeholder="القسم أو الإدارة">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="notes">ملاحظات إضافية</label>
+                            <textarea id="notes" class="form-control" rows="3" 
+                                      placeholder="ملاحظات إضافية..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">💾 حفظ الاسم</button>
+                        <button type="button" class="btn btn-danger" onclick="hideNameForm()">❌ إلغاء</button>
+                    </form>
+                    <div id="nameMessage"></div>
+                </div>
+                
+                <div id="namesList"></div>
+            </div>
         </div>
 
         <!-- صفحة الفواتير -->
@@ -673,7 +1175,7 @@
             <div id="invoicesContent" style="display: none;">
                 <div class="actions">
                     <button onclick="showInvoiceForm()" class="btn btn-success">➕ إنشاء فاتورة جديدة</button>
-                    <button onclick="exportInvoicesToExcel()" class="btn">📥 تصدير الفواتير</button>
+                    <button onclick="exportInvoicesToPDF()" class="btn">📥 تصدير الفواتير (PDF)</button>
                     <button onclick="deleteAllInvoices()" class="btn btn-danger">🗑️ حذف جميع الفواتير</button>
                 </div>
                 
@@ -715,6 +1217,23 @@
                                         <option value="overdue">متأخرة</option>
                                         <option value="cancelled">ملغاة</option>
                                     </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- إضافة حقول جديدة للشركة والشعار -->
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="companyName">اسم الشركة / المتجر</label>
+                                    <input type="text" id="companyName" class="form-control" 
+                                           placeholder="اسم الشركة أو المتجر">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="companyLogo">شعار الشركة</label>
+                                    <input type="file" id="companyLogo" class="form-control" accept="image/*">
                                 </div>
                             </div>
                         </div>
@@ -774,7 +1293,7 @@
             
             <div id="reportsContent" style="display: none;">
                 <div class="actions">
-                    <button onclick="exportToExcel()" class="btn">📥 تصدير إلى Excel</button>
+                    <button onclick="exportToPDF()" class="btn">📥 تصدير إلى PDF</button>
                     <button onclick="deleteAllShipments()" class="btn btn-danger">🗑️ حذف جميع الشحنات</button>
                 </div>
                 
@@ -827,13 +1346,53 @@
         </div>
     </div>
 
+    <!-- نافذة التصدير إلى PDF -->
+    <div id="pdfExportModal" class="pdf-export-modal">
+        <div class="pdf-export-content">
+            <div class="pdf-export-header">
+                <h3>📄 تصدير إلى PDF</h3>
+                <button class="close-modal" onclick="closePDFModal()">✕</button>
+            </div>
+            <form id="pdfExportForm">
+                <div class="form-group">
+                    <label for="exportCompanyName">اسم الشركة / المتجر *</label>
+                    <input type="text" id="exportCompanyName" class="form-control" required 
+                           placeholder="أدخل اسم الشركة أو المتجر">
+                </div>
+                <div class="form-group">
+                    <label for="exportCompanyLogo">شعار الشركة</label>
+                    <input type="file" id="exportCompanyLogo" class="form-control" accept="image/*">
+                </div>
+                <div id="logoPreview" style="text-align: center;"></div>
+                <div class="form-group">
+                    <label for="exportTitle">عنوان التقرير</label>
+                    <input type="text" id="exportTitle" class="form-control" 
+                           placeholder="عنوان التقرير (اختياري)">
+                </div>
+                <div class="form-group">
+                    <label for="exportNotes">ملاحظات إضافية</label>
+                    <textarea id="exportNotes" class="form-control" rows="3" 
+                              placeholder="ملاحظات إضافية للتقرير..."></textarea>
+                </div>
+                <div class="actions">
+                    <button type="button" class="btn btn-success" onclick="generatePDF()">📄 إنشاء PDF</button>
+                    <button type="button" class="btn btn-danger" onclick="closePDFModal()">❌ إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // نظام تتبع الحمولة والفواتير - JavaScript الكامل مع التحسينات
-        class ShipmentSystem {
+        // نظام "حساباتك" المتكامل - JavaScript الكامل مع إضافة الأطراف المتعددة
+        class AccountSystem {
             constructor() {
                 this.shipments = JSON.parse(localStorage.getItem('shipments')) || [];
                 this.invoices = JSON.parse(localStorage.getItem('invoices')) || [];
+                this.names = JSON.parse(localStorage.getItem('names')) || [];
+                this.inventory = JSON.parse(localStorage.getItem('inventory')) || [];
                 this.systemPassword = localStorage.getItem('systemPassword') || 'admin123';
+                this.currentExportType = null;
+                this.currentExportData = null;
                 this.init();
             }
 
@@ -841,19 +1400,15 @@
                 this.updateStats();
                 this.setupEventListeners();
                 this.setupInvoiceCalculations();
+                this.displayParties();
+                this.setupPDFExportModal();
             }
 
             setupEventListeners() {
-                // نموذج الطرف الأول
-                document.getElementById('party1Form').addEventListener('submit', (e) => {
+                // نموذج إضافة طرف
+                document.getElementById('partyForm').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    this.addFirstParty();
-                });
-
-                // نموذج الطرف الثاني
-                document.getElementById('party2Form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.addSecondParty();
+                    this.addParty();
                 });
 
                 // نموذج الفاتورة
@@ -862,9 +1417,44 @@
                     this.addInvoice();
                 });
 
+                // نموذج تسجيل الأسماء
+                document.getElementById('newNameForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addName();
+                });
+
+                // نموذج إدارة المخزون
+                document.getElementById('newInventoryForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addInventoryItem();
+                });
+
                 // تحديث حساب الضريبة والمبلغ الإجمالي
                 document.getElementById('subtotal').addEventListener('input', () => this.calculateInvoiceTotal());
                 document.getElementById('taxRate').addEventListener('input', () => this.calculateInvoiceTotal());
+
+                // معاينة الشعار في نافذة التصدير
+                document.getElementById('exportCompanyLogo').addEventListener('change', (e) => {
+                    this.previewLogo(e.target.files[0]);
+                });
+            }
+
+            setupPDFExportModal() {
+                // إعداد نافذة التصدير إلى PDF
+                document.getElementById('exportCompanyLogo').addEventListener('change', (e) => {
+                    this.previewLogo(e.target.files[0]);
+                });
+            }
+
+            previewLogo(file) {
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById('logoPreview').innerHTML = 
+                            `<img src="${e.target.result}" class="preview-logo" alt="معاينة الشعار">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
             }
 
             setupInvoiceCalculations() {
@@ -885,20 +1475,22 @@
                 document.getElementById('totalAmount').value = totalAmount.toFixed(2);
             }
 
-            addFirstParty() {
-                const shipmentNumber = document.getElementById('shipmentNumber1').value.trim();
-                const weight = parseFloat(document.getElementById('weight1').value);
-                const details = document.getElementById('details1').value.trim();
-                const partyName = document.getElementById('party1Name').value.trim();
+            addParty() {
+                const shipmentNumber = document.getElementById('shipmentNumber').value.trim();
+                const partyName = document.getElementById('partyName').value.trim();
+                const weight = parseFloat(document.getElementById('weight').value);
+                const units = parseInt(document.getElementById('units').value);
+                const partyType = document.getElementById('partyType').value;
+                const details = document.getElementById('details').value.trim();
 
                 // التحقق من البيانات
-                if (!shipmentNumber || !weight || !details || !partyName) {
-                    this.showMessage('party1Message', '❌ يرجى ملء جميع الحقول المطلوبة', 'error');
+                if (!shipmentNumber || !partyName || !weight || !units || !partyType || !details) {
+                    this.showMessage('partyMessage', '❌ يرجى ملء جميع الحقول المطلوبة', 'error');
                     return;
                 }
 
-                if (weight <= 0) {
-                    this.showMessage('party1Message', '❌ يرجى إدخال وزن صحيح', 'error');
+                if (weight <= 0 || units <= 0) {
+                    this.showMessage('partyMessage', '❌ يرجى إدخال وزن وعدد وحدات صحيح', 'error');
                     return;
                 }
 
@@ -906,42 +1498,37 @@
                 let shipment = this.shipments.find(s => s.shipmentNumber === shipmentNumber);
                 
                 if (shipment) {
-                    // إذا وجدت الشحنة، نحدث بيانات الطرف الأول
-                    if (shipment.weight1 !== null) {
-                        this.showMessage('party1Message', '❌ تم إدخال بيانات الطرف الأول مسبقاً لهذه الشحنة', 'error');
+                    // إذا وجدت الشحنة، نتحقق من عدم وجود طرف بنفس الاسم
+                    const existingParty = shipment.parties.find(p => p.partyName === partyName);
+                    if (existingParty) {
+                        this.showMessage('partyMessage', '❌ تم إدخال بيانات هذا الطرف مسبقاً لهذه الشحنة', 'error');
                         return;
                     }
 
-                    shipment.weight1 = weight;
-                    shipment.details1 = details;
-                    shipment.party1Name = partyName;
-                    shipment.updatedAt = new Date().toISOString();
+                    // إضافة الطرف الجديد للشحنة
+                    shipment.parties.push({
+                        partyName: partyName,
+                        weight: weight,
+                        units: units,
+                        partyType: partyType,
+                        details: details,
+                        addedAt: new Date().toISOString()
+                    });
 
-                    // إذا كانت بيانات الطرف الثاني موجودة، نقارن
-                    if (shipment.weight2 !== null) {
-                        const weightMatch = shipment.weight1 === shipment.weight2;
-                        const detailsMatch = shipment.details1.toLowerCase() === shipment.details2.toLowerCase();
-                        
-                        shipment.status = weightMatch && detailsMatch ? 'completed' : 'completed';
-                        shipment.comparison = {
-                            weightMatch: weightMatch,
-                            detailsMatch: detailsMatch,
-                            weightDifference: shipment.weight1 - shipment.weight2
-                        };
-                    } else {
-                        shipment.status = 'active';
-                    }
+                    shipment.updatedAt = new Date().toISOString();
                 } else {
                     // إذا لم توجد الشحنة، ننشئ شحنة جديدة
                     shipment = {
                         id: Date.now(),
                         shipmentNumber: shipmentNumber,
-                        weight1: weight,
-                        details1: details,
-                        party1Name: partyName,
-                        weight2: null,
-                        details2: null,
-                        party2Name: null,
+                        parties: [{
+                            partyName: partyName,
+                            weight: weight,
+                            units: units,
+                            partyType: partyType,
+                            details: details,
+                            addedAt: new Date().toISOString()
+                        }],
                         status: 'active',
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
@@ -951,94 +1538,285 @@
 
                 this.saveToStorage();
                 
-                this.showMessage('party1Message', 
-                    `✅ تم إدخال بيانات الطرف الأول بنجاح للشحنة: ${shipmentNumber}`, 
+                this.showMessage('partyMessage', 
+                    `✅ تم إدخال بيانات الطرف ${partyName} بنجاح للشحنة: ${shipmentNumber}`, 
                     'success');
-                this.clearForm('party1Form');
+                this.clearForm('partyForm');
+                this.displayParties();
                 this.updateStats();
             }
 
-            addSecondParty() {
-                const shipmentNumber = document.getElementById('shipmentNumber2').value.trim();
-                const weight = parseFloat(document.getElementById('weight2').value);
-                const details = document.getElementById('details2').value.trim();
-                const partyName = document.getElementById('party2Name').value.trim();
-
-                if (!shipmentNumber || !weight || weight <= 0 || !details || !partyName) {
-                    this.showMessage('party2Message', '❌ يرجى ملء جميع الحقول المطلوبة بشكل صحيح', 'error');
+            displayParties() {
+                const listDiv = document.getElementById('partiesList');
+                
+                if (this.shipments.length === 0) {
+                    listDiv.innerHTML = '<div class="alert alert-warning">لا توجد شحنات مسجلة</div>';
                     return;
                 }
 
-                // البحث عن الشحنة بنفس رقم الشحنة
-                let shipment = this.shipments.find(s => s.shipmentNumber === shipmentNumber);
+                let html = '<h3>📦 قائمة الشحنات والأطراف</h3>';
                 
-                if (shipment) {
-                    // إذا وجدت الشحنة، نحدث بيانات الطرف الثاني
-                    if (shipment.weight2 !== null) {
-                        this.showMessage('party2Message', '❌ تم إدخال بيانات الطرف الثاني مسبقاً لهذه الشحنة', 'error');
-                        return;
-                    }
+                this.shipments.forEach(shipment => {
+                    html += `
+                        <div class="shipment-card">
+                            <div class="party-header">
+                                <h4>رقم الشحنة: ${shipment.shipmentNumber}</h4>
+                                <div class="party-actions">
+                                    <button class="btn btn-warning" onclick="viewShipmentParties(${shipment.id})">👁️ عرض التفاصيل</button>
+                                    <button class="btn btn-danger" onclick="deleteShipment(${shipment.id})">🗑️ حذف الشحنة</button>
+                                </div>
+                            </div>
+                            <p><strong>عدد الأطراف:</strong> ${shipment.parties.length}</p>
+                            <p><strong>الحالة:</strong> ${this.getShipmentStatusText(shipment.status)}</p>
+                            <p><strong>تاريخ الإنشاء:</strong> ${new Date(shipment.createdAt).toLocaleDateString('ar-SA')}</p>
+                        </div>
+                    `;
+                });
 
-                    shipment.weight2 = weight;
-                    shipment.details2 = details;
-                    shipment.party2Name = partyName;
-                    shipment.updatedAt = new Date().toISOString();
+                listDiv.innerHTML = html;
+            }
 
-                    // إذا كانت بيانات الطرف الأول موجودة، نقارن
-                    if (shipment.weight1 !== null) {
-                        const weightMatch = shipment.weight1 === shipment.weight2;
-                        const detailsMatch = shipment.details1.toLowerCase() === shipment.details2.toLowerCase();
+            viewShipmentParties(id) {
+                const shipment = this.shipments.find(s => s.id === id);
+                if (!shipment) return;
+
+                let html = `
+                    <div class="shipment-card">
+                        <div class="party-header">
+                            <h3>تفاصيل الشحنة: ${shipment.shipmentNumber}</h3>
+                            <button class="btn btn-teal" onclick="exportShipmentToPDF(${shipment.id})">📥 تصدير البيانات</button>
+                        </div>
+                        <div class="party-details">
+                            <div class="party-detail">
+                                <strong>عدد الأطراف:</strong> ${shipment.parties.length}
+                            </div>
+                            <div class="party-detail">
+                                <strong>الحالة:</strong> ${this.getShipmentStatusText(shipment.status)}
+                            </div>
+                            <div class="party-detail">
+                                <strong>تاريخ الإنشاء:</strong> ${new Date(shipment.createdAt).toLocaleDateString('ar-SA')}
+                            </div>
+                            <div class="party-detail">
+                                <strong>آخر تحديث:</strong> ${new Date(shipment.updatedAt).toLocaleDateString('ar-SA')}
+                            </div>
+                        </div>
+                `;
+
+                shipment.parties.forEach((party, index) => {
+                    html += `
+                        <div class="party-card">
+                            <div class="party-header">
+                                <h4>${index + 1}. ${party.partyName}</h4>
+                                <div class="party-actions">
+                                    <button class="btn btn-warning" onclick="editParty(${shipment.id}, ${index})">✏️ تعديل</button>
+                                    <button class="btn btn-danger" onclick="deleteParty(${shipment.id}, ${index})">🗑️ حذف</button>
+                                </div>
+                            </div>
+                            <div class="party-details">
+                                <div class="party-detail">
+                                    <strong>نوع الطرف:</strong> ${this.getPartyTypeText(party.partyType)}
+                                </div>
+                                <div class="party-detail">
+                                    <strong>الوزن:</strong> ${party.weight} كجم
+                                </div>
+                                <div class="party-detail">
+                                    <strong>عدد الوحدات:</strong> ${party.units}
+                                </div>
+                                <div class="party-detail">
+                                    <strong>التفاصيل:</strong> ${party.details}
+                                </div>
+                                <div class="party-detail">
+                                    <strong>تاريخ الإضافة:</strong> ${new Date(party.addedAt).toLocaleDateString('ar-SA')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+
+                // إنشاء نافذة عرض الشحنة
+                const shipmentWindow = window.open('', '_blank', 'width=900,height=700');
+                shipmentWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html dir="rtl">
+                    <head>
+                        <title>شحنة ${shipment.shipmentNumber}</title>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                padding: 20px; 
+                                margin: 0;
+                                background: #f5f5f5;
+                            }
+                            .shipment-card { 
+                                max-width: 800px; 
+                                margin: 0 auto; 
+                                background: white; 
+                                padding: 30px; 
+                                border-radius: 15px; 
+                                box-shadow: 0 5px 25px rgba(0,0,0,0.1); 
+                            }
+                            .party-header { 
+                                display: flex; 
+                                justify-content: space-between; 
+                                align-items: center; 
+                                margin-bottom: 20px; 
+                                padding-bottom: 15px; 
+                                border-bottom: 2px solid #e0e0e0; 
+                            }
+                            .party-details { 
+                                display: grid; 
+                                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+                                gap: 15px; 
+                                margin-bottom: 20px;
+                            }
+                            .party-detail { 
+                                padding: 10px; 
+                                background: #f8f9fa; 
+                                border-radius: 8px; 
+                            }
+                            .party-detail strong { 
+                                color: #1a237e; 
+                            }
+                            .party-card { 
+                                background: white; 
+                                border: 1px solid #e0e0e0; 
+                                border-radius: 15px; 
+                                padding: 20px; 
+                                margin: 15px 0; 
+                                box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
+                            }
+                            .btn { 
+                                padding: 10px 20px; 
+                                border: none; 
+                                border-radius: 5px; 
+                                cursor: pointer; 
+                                margin: 5px; 
+                                font-weight: bold;
+                            }
+                            .btn-warning { 
+                                background: #ff9800; 
+                                color: white; 
+                            }
+                            .btn-danger { 
+                                background: #f44336; 
+                                color: white; 
+                            }
+                            .btn-teal { 
+                                background: #009688; 
+                                color: white; 
+                            }
+                            @media print {
+                                body { 
+                                    background: white; 
+                                    padding: 0; 
+                                }
+                                .shipment-card { 
+                                    box-shadow: none; 
+                                    margin: 0; 
+                                    padding: 20px; 
+                                }
+                                button { 
+                                    display: none; 
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${html}
+                        <br>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button onclick="window.print()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">🖨️ طباعة</button>
+                            <button onclick="window.close()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">إغلاق</button>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                shipmentWindow.document.close();
+            }
+
+            getShipmentStatusText(status) {
+                const statuses = {
+                    'active': 'نشطة',
+                    'completed': 'مكتملة'
+                };
+                return statuses[status] || status;
+            }
+
+            getPartyTypeText(type) {
+                const types = {
+                    'sender': 'مرسل',
+                    'receiver': 'مستلم',
+                    'shipper': 'شاحن',
+                    'carrier': 'ناقل',
+                    'supplier': 'مورد',
+                    'other': 'آخر'
+                };
+                return types[type] || type;
+            }
+
+            deleteShipment(id) {
+                if (confirm('هل أنت متأكد من حذف هذه الشحنة وجميع الأطراف المرتبطة بها؟')) {
+                    this.shipments = this.shipments.filter(s => s.id !== id);
+                    this.saveToStorage();
+                    this.displayParties();
+                    this.updateStats();
+                    alert('✅ تم حذف الشحنة بنجاح');
+                }
+            }
+
+            deleteParty(shipmentId, partyIndex) {
+                if (confirm('هل أنت متأكد من حذف هذا الطرف؟')) {
+                    const shipment = this.shipments.find(s => s.id === shipmentId);
+                    if (shipment) {
+                        shipment.parties.splice(partyIndex, 1);
                         
-                        shipment.status = 'completed';
-                        shipment.comparison = {
-                            weightMatch: weightMatch,
-                            detailsMatch: detailsMatch,
-                            weightDifference: shipment.weight1 - shipment.weight2
-                        };
-                    } else {
-                        shipment.status = 'active';
+                        // إذا لم يعد هناك أطراف، نحذف الشحنة
+                        if (shipment.parties.length === 0) {
+                            this.shipments = this.shipments.filter(s => s.id !== shipmentId);
+                        } else {
+                            shipment.updatedAt = new Date().toISOString();
+                        }
+                        
+                        this.saveToStorage();
+                        this.displayParties();
+                        this.updateStats();
+                        alert('✅ تم حذف الطرف بنجاح');
                     }
-                } else {
-                    // إذا لم توجد الشحنة، ننشئ شحنة جديدة (الطرف الثاني فقط)
-                    shipment = {
-                        id: Date.now(),
-                        shipmentNumber: shipmentNumber,
-                        weight1: null,
-                        details1: null,
-                        party1Name: null,
-                        weight2: weight,
-                        details2: details,
-                        party2Name: partyName,
-                        status: 'active',
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    };
-                    this.shipments.push(shipment);
+                }
+            }
+
+            exportShipmentToPDF(id) {
+                const shipment = this.shipments.find(s => s.id === id);
+                if (!shipment) {
+                    alert('❌ الشحنة غير موجودة');
+                    return;
                 }
 
-                this.saveToStorage();
-                
-                let message = `✅ تم إدخال بيانات الطرف الثاني بنجاح للشحنة: ${shipmentNumber}`;
-                
-                this.showMessage('party2Message', message, 'success');
-                this.clearForm('party2Form');
-                this.updateStats();
+                this.currentExportType = 'shipment';
+                this.currentExportData = shipment;
+                this.showPDFExportModal();
             }
 
             addInvoice() {
                 const invoiceNumber = document.getElementById('invoiceNumber').value.trim();
                 const invoiceDate = document.getElementById('invoiceDate').value;
-                const dueDate = document.getElementById('dueDate').value;
                 const clientName = document.getElementById('clientName').value.trim();
-                const shipmentNumber = document.getElementById('shipmentNumberInvoice').value.trim();
+                const shipmentNumberInvoice = document.getElementById('shipmentNumberInvoice').value.trim();
+                const dueDate = document.getElementById('dueDate').value;
                 const invoiceStatus = document.getElementById('invoiceStatus').value;
                 const invoiceItems = document.getElementById('invoiceItems').value.trim();
                 const subtotal = parseFloat(document.getElementById('subtotal').value);
                 const taxRate = parseFloat(document.getElementById('taxRate').value);
                 const totalAmount = parseFloat(document.getElementById('totalAmount').value);
+                const companyName = document.getElementById('companyName').value.trim();
+                const companyLogoFile = document.getElementById('companyLogo').files[0];
 
                 // التحقق من البيانات
-                if (!invoiceNumber || !invoiceDate || !dueDate || !clientName || !invoiceItems || !subtotal) {
+                if (!invoiceNumber || !invoiceDate || !clientName || !dueDate || !invoiceStatus || !invoiceItems || !subtotal || !totalAmount) {
                     this.showMessage('invoiceMessage', '❌ يرجى ملء جميع الحقول المطلوبة', 'error');
                     return;
                 }
@@ -1055,19 +1833,36 @@
                     return;
                 }
 
+                // معالجة صورة الشعار
+                let companyLogoBase64 = '';
+                if (companyLogoFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        companyLogoBase64 = e.target.result;
+                        this.saveInvoiceWithLogo(invoiceNumber, invoiceDate, clientName, shipmentNumberInvoice, dueDate, invoiceStatus, invoiceItems, subtotal, taxRate, totalAmount, companyName, companyLogoBase64);
+                    };
+                    reader.readAsDataURL(companyLogoFile);
+                } else {
+                    this.saveInvoiceWithLogo(invoiceNumber, invoiceDate, clientName, shipmentNumberInvoice, dueDate, invoiceStatus, invoiceItems, subtotal, taxRate, totalAmount, companyName, '');
+                }
+            }
+
+            saveInvoiceWithLogo(invoiceNumber, invoiceDate, clientName, shipmentNumberInvoice, dueDate, invoiceStatus, invoiceItems, subtotal, taxRate, totalAmount, companyName, companyLogoBase64) {
                 // إنشاء الفاتورة الجديدة
                 const invoice = {
                     id: Date.now(),
                     invoiceNumber: invoiceNumber,
                     invoiceDate: invoiceDate,
-                    dueDate: dueDate,
                     clientName: clientName,
-                    shipmentNumber: shipmentNumber || null,
-                    status: invoiceStatus,
-                    items: invoiceItems,
+                    shipmentNumberInvoice: shipmentNumberInvoice,
+                    dueDate: dueDate,
+                    invoiceStatus: invoiceStatus,
+                    invoiceItems: invoiceItems,
                     subtotal: subtotal,
                     taxRate: taxRate,
                     totalAmount: totalAmount,
+                    companyName: companyName,
+                    companyLogo: companyLogoBase64,
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
@@ -1104,177 +1899,275 @@
                     return;
                 }
 
-                let html = '<h3>🧾 قائمة الفواتير</h3>';
+                let html = '<h3>🧾 قائمة الفواتير المسجلة</h3>';
+                
+                // إنشاء جدول للفواتير
+                html += '<table class="invoice-table">';
+                html += '<tr><th>رقم الفاتورة</th><th>اسم العميل</th><th>التاريخ</th><th>المبلغ الإجمالي</th><th>الحالة</th><th>الإجراءات</th></tr>';
                 
                 this.invoices.forEach(invoice => {
-                    const statusIcons = {
-                        'pending': '⏳',
-                        'paid': '✅',
-                        'overdue': '⚠️',
-                        'cancelled': '❌'
-                    };
-                    
-                    const statusColors = {
-                        'pending': '#ff9800',
-                        'paid': '#4caf50',
-                        'overdue': '#f44336',
-                        'cancelled': '#9e9e9e'
-                    };
-                    
                     html += `
-                        <div class="invoice-card">
-                            <div class="row">
-                                <div class="col">
-                                    <strong>${statusIcons[invoice.status]} فاتورة: ${invoice.invoiceNumber}</strong><br>
-                                    <span style="color: ${statusColors[invoice.status]}; font-weight: bold;">${this.getInvoiceStatusText(invoice.status)}</span><br>
-                                    <small>التاريخ: ${new Date(invoice.invoiceDate).toLocaleDateString('ar-SA')}</small>
-                                </div>
-                                <div class="col">
-                                    <strong>العميل:</strong> ${invoice.clientName}<br>
-                                    <strong>الشحنة:</strong> ${invoice.shipmentNumber || 'غير مرتبطة'}<br>
-                                    <strong>المبلغ:</strong> ${invoice.totalAmount.toFixed(2)} ريال
-                                </div>
-                            </div>
-                            <div class="row" style="margin-top: 10px;">
-                                <div class="col">
-                                    <strong>البنود:</strong> ${invoice.items}
-                                </div>
-                            </div>
-                            <div class="row" style="margin-top: 10px;">
-                                <div class="col">
-                                    <button class="btn btn-warning" onclick="viewInvoice('${invoice.invoiceNumber}')">👁️ عرض التفاصيل</button>
-                                    <button class="btn btn-danger" onclick="deleteInvoice('${invoice.invoiceNumber}')">🗑️ حذف</button>
-                                </div>
-                            </div>
-                        </div>
+                        <tr>
+                            <td>${invoice.invoiceNumber}</td>
+                            <td>${invoice.clientName}</td>
+                            <td>${invoice.invoiceDate}</td>
+                            <td>${invoice.totalAmount.toFixed(2)} ريال</td>
+                            <td><span class="badge ${this.getInvoiceStatusClass(invoice.invoiceStatus)}">${this.getInvoiceStatusText(invoice.invoiceStatus)}</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="viewInvoice(${invoice.id})">👁️ عرض</button>
+                                <button class="btn btn-danger" onclick="deleteInvoice(${invoice.id})">🗑️ حذف</button>
+                                <button class="btn btn-teal" onclick="printInvoice(${invoice.id})">🖨️ طباعة</button>
+                            </td>
+                        </tr>
                     `;
                 });
+
+                html += '</table>';
 
                 listDiv.innerHTML = html;
             }
 
-            viewInvoice(invoiceNumber) {
-                const invoice = this.invoices.find(i => i.invoiceNumber === invoiceNumber);
+            getInvoiceStatusText(status) {
+                const statuses = {
+                    'pending': 'قيد الانتظار',
+                    'paid': 'مدفوعة',
+                    'overdue': 'متأخرة',
+                    'cancelled': 'ملغاة'
+                };
+                return statuses[status] || status;
+            }
+
+            getInvoiceStatusClass(status) {
+                const classes = {
+                    'pending': 'badge-warning',
+                    'paid': 'badge-success',
+                    'overdue': 'badge-danger',
+                    'cancelled': 'badge-info'
+                };
+                return classes[status] || 'badge-info';
+            }
+
+            viewInvoice(id) {
+                const invoice = this.invoices.find(i => i.id === id);
                 if (!invoice) return;
 
-                const statusColors = {
-                    'pending': '#ff9800',
-                    'paid': '#4caf50',
-                    'overdue': '#f44336',
-                    'cancelled': '#9e9e9e'
-                };
-
+                // إنشاء محتوى الفاتورة
                 let html = `
-                    <div class="invoice-card">
-                        <h3>🧾 تفاصيل الفاتورة: ${invoice.invoiceNumber}</h3>
-                        <div class="row">
-                            <div class="col">
-                                <strong>رقم الفاتورة:</strong> ${invoice.invoiceNumber}<br>
-                                <strong>تاريخ الفاتورة:</strong> ${new Date(invoice.invoiceDate).toLocaleDateString('ar-SA')}<br>
-                                <strong>تاريخ الاستحقاق:</strong> ${new Date(invoice.dueDate).toLocaleDateString('ar-SA')}
+                    <div class="invoice-preview">
+                        <div class="invoice-header">
+                            <div class="company-info">
+                                ${invoice.companyLogo ? `<img src="${invoice.companyLogo}" class="company-logo" alt="شعار الشركة">` : ''}
+                                <div class="company-details">
+                                    ${invoice.companyName ? `<h3>${invoice.companyName}</h3>` : ''}
+                                    <p>${invoice.invoiceDate}</p>
+                                </div>
                             </div>
-                            <div class="col">
-                                <strong>العميل:</strong> ${invoice.clientName}<br>
-                                <strong>رقم الشحنة:</strong> ${invoice.shipmentNumber || 'غير مرتبطة'}<br>
-                                <strong>الحالة:</strong> <span style="color: ${statusColors[invoice.status]}; font-weight: bold;">${this.getInvoiceStatusText(invoice.status)}</span>
-                            </div>
-                        </div>
-                        <div class="row" style="margin-top: 15px;">
-                            <div class="col">
-                                <strong>البنود والخدمات:</strong><br>
-                                ${invoice.items}
+                            <div>
+                                <h2>فاتورة #${invoice.invoiceNumber}</h2>
+                                <p><strong>الحالة:</strong> <span class="badge ${this.getInvoiceStatusClass(invoice.invoiceStatus)}">${this.getInvoiceStatusText(invoice.invoiceStatus)}</span></p>
                             </div>
                         </div>
-                        <table class="invoice-table" style="margin-top: 20px;">
-                            <tr>
-                                <th>البند</th>
-                                <th>القيمة</th>
-                            </tr>
-                            <tr>
-                                <td>المبلغ الإجمالي (بدون ضريبة)</td>
-                                <td>${invoice.subtotal.toFixed(2)} ريال</td>
-                            </tr>
-                            <tr>
-                                <td>نسبة الضريبة</td>
-                                <td>${invoice.taxRate}%</td>
-                            </tr>
-                            <tr class="invoice-total">
-                                <td>المبلغ الإجمالي (بما فيه الضريبة)</td>
-                                <td>${invoice.totalAmount.toFixed(2)} ريال</td>
-                            </tr>
-                        </table>
+                        
+                        <div class="row" style="margin-bottom: 20px;">
+                            <div class="col">
+                                <h4>معلومات العميل</h4>
+                                <p><strong>اسم العميل:</strong> ${invoice.clientName}</p>
+                                ${invoice.shipmentNumberInvoice ? `<p><strong>رقم الشحنة:</strong> ${invoice.shipmentNumberInvoice}</p>` : ''}
+                            </div>
+                            <div class="col">
+                                <h4>معلومات الفاتورة</h4>
+                                <p><strong>تاريخ الإصدار:</strong> ${invoice.invoiceDate}</p>
+                                <p><strong>تاريخ الاستحقاق:</strong> ${invoice.dueDate}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <h4>بنود الفاتورة</h4>
+                            <div style="background: #f5f5f5; padding: 15px; border-radius: 10px;">
+                                ${invoice.invoiceItems.split('\n').map(item => `<p>${item}</p>`).join('')}
+                            </div>
+                        </div>
+                        
                         <div class="row" style="margin-top: 20px;">
                             <div class="col">
-                                <button class="btn" onclick="printInvoice('${invoice.invoiceNumber}')">🖨️ طباعة الفاتورة</button>
-                                <button class="btn btn-warning" onclick="editInvoice('${invoice.invoiceNumber}')">✏️ تعديل الفاتورة</button>
+                                <h4>ملخص المدفوعات</h4>
+                                <p><strong>المبلغ الإجمالي (بدون ضريبة):</strong> ${invoice.subtotal.toFixed(2)} ريال</p>
+                                <p><strong>نسبة الضريبة:</strong> ${invoice.taxRate}%</p>
+                                <p><strong>مبلغ الضريبة:</strong> ${(invoice.subtotal * invoice.taxRate / 100).toFixed(2)} ريال</p>
+                                <p><strong>المبلغ الإجمالي:</strong> <strong style="font-size: 1.2em;">${invoice.totalAmount.toFixed(2)} ريال</strong></p>
                             </div>
+                        </div>
+                        
+                        <div class="qrcode-container">
+                            <h4>رمز QR للفاتورة</h4>
+                            <div id="qrcode-${invoice.id}"></div>
+                        </div>
+                        
+                        <div class="invoice-footer">
+                            <p>شكراً لتعاملكم معنا</p>
                         </div>
                     </div>
                 `;
 
                 // إنشاء نافذة عرض الفاتورة
-                const invoiceDetails = window.open('', '_blank', 'width=800,height=600');
-                invoiceDetails.document.write(`
+                const invoiceWindow = window.open('', '_blank', 'width=900,height=700');
+                invoiceWindow.document.write(`
+                    <!DOCTYPE html>
                     <html dir="rtl">
                     <head>
                         <title>فاتورة ${invoice.invoiceNumber}</title>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <style>
-                            body { font-family: Arial, sans-serif; padding: 20px; }
-                            .invoice-header { text-align: center; margin-bottom: 30px; }
-                            .invoice-details { margin-bottom: 20px; }
-                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-                            th, td { padding: 10px; border: 1px solid #ddd; text-align: right; }
-                            th { background-color: #f5f5f5; }
-                            .total-row { font-weight: bold; background-color: #f0f0f0; }
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                padding: 20px; 
+                                margin: 0;
+                                background: #f5f5f5;
+                            }
+                            .invoice-preview { 
+                                max-width: 800px; 
+                                margin: 0 auto; 
+                                background: white; 
+                                padding: 30px; 
+                                border-radius: 15px; 
+                                box-shadow: 0 5px 25px rgba(0,0,0,0.1); 
+                            }
+                            .invoice-header { 
+                                display: flex; 
+                                justify-content: space-between; 
+                                align-items: center; 
+                                margin-bottom: 20px; 
+                                padding-bottom: 15px; 
+                                border-bottom: 2px solid #e0e0e0; 
+                            }
+                            .company-info { 
+                                display: flex; 
+                                align-items: center; 
+                                gap: 15px; 
+                            }
+                            .company-logo { 
+                                max-width: 120px; 
+                                max-height: 120px; 
+                                border-radius: 10px; 
+                            }
+                            .badge { 
+                                padding: 5px 10px; 
+                                border-radius: 20px; 
+                                font-size: 0.8em; 
+                                font-weight: bold; 
+                            }
+                            .badge-success { 
+                                background: #e8f5e9; 
+                                color: #2e7d32; 
+                            }
+                            .badge-warning { 
+                                background: #fff3e0; 
+                                color: #ef6c00; 
+                            }
+                            .badge-danger { 
+                                background: #ffebee; 
+                                color: #c62828; 
+                            }
+                            .badge-info { 
+                                background: #e3f2fd; 
+                                color: #1565c0; 
+                            }
+                            .row { 
+                                display: flex; 
+                                margin: 0 -12px; 
+                            }
+                            .col { 
+                                flex: 1; 
+                                padding: 0 12px; 
+                            }
+                            .invoice-footer { 
+                                margin-top: 30px; 
+                                padding-top: 20px; 
+                                border-top: 1px solid #e0e0e0; 
+                                text-align: center; 
+                                color: #666; 
+                            }
+                            .qrcode-container { 
+                                text-align: center; 
+                                margin: 20px 0; 
+                            }
+                            .qrcode-container canvas { 
+                                border: 1px solid #e0e0e0; 
+                                border-radius: 10px; 
+                                padding: 10px; 
+                                background: white; 
+                            }
                             @media print {
-                                button { display: none; }
+                                body { 
+                                    background: white; 
+                                    padding: 0; 
+                                }
+                                .invoice-preview { 
+                                    box-shadow: none; 
+                                    margin: 0; 
+                                    padding: 20px; 
+                                }
+                                button { 
+                                    display: none; 
+                                }
                             }
                         </style>
                     </head>
                     <body>
-                        <div class="invoice-header">
-                            <h1>فاتورة ${invoice.invoiceNumber}</h1>
-                        </div>
-                        <div class="invoice-details">
-                            <p><strong>العميل:</strong> ${invoice.clientName}</p>
-                            <p><strong>تاريخ الفاتورة:</strong> ${new Date(invoice.invoiceDate).toLocaleDateString('ar-SA')}</p>
-                            <p><strong>تاريخ الاستحقاق:</strong> ${new Date(invoice.dueDate).toLocaleDateString('ar-SA')}</p>
-                            <p><strong>الحالة:</strong> ${this.getInvoiceStatusText(invoice.status)}</p>
-                        </div>
-                        <div>
-                            <h3>البنود والخدمات:</h3>
-                            <p>${invoice.items}</p>
-                        </div>
-                        <table>
-                            <tr>
-                                <th>البند</th>
-                                <th>القيمة</th>
-                            </tr>
-                            <tr>
-                                <td>المبلغ الإجمالي (بدون ضريبة)</td>
-                                <td>${invoice.subtotal.toFixed(2)} ريال</td>
-                            </tr>
-                            <tr>
-                                <td>نسبة الضريبة</td>
-                                <td>${invoice.taxRate}%</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td>المبلغ الإجمالي (بما فيه الضريبة)</td>
-                                <td>${invoice.totalAmount.toFixed(2)} ريال</td>
-                            </tr>
-                        </table>
+                        ${html}
                         <br>
-                        <button onclick="window.print()">🖨️ طباعة</button>
-                        <button onclick="window.close()">إغلاق</button>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button onclick="window.print()" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">🖨️ طباعة</button>
+                            <button onclick="window.close()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">إغلاق</button>
+                        </div>
+                        <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+                        <script>
+                            // إنشاء QR Code بعد تحميل الصفحة
+                            window.onload = function() {
+                                const qrData = {
+                                    invoiceNumber: "${invoice.invoiceNumber}",
+                                    clientName: "${invoice.clientName}",
+                                    date: "${invoice.invoiceDate}",
+                                    totalAmount: "${invoice.totalAmount.toFixed(2)}",
+                                    status: "${invoice.invoiceStatus}"
+                                };
+                                
+                                const qrText = JSON.stringify(qrData);
+                                const qrElement = document.getElementById('qrcode-${invoice.id}');
+                                
+                                if (qrElement && typeof QRCode !== 'undefined') {
+                                    QRCode.toCanvas(qrElement, qrText, {
+                                        width: 150,
+                                        margin: 2,
+                                        color: {
+                                            dark: '#1a237e',
+                                            light: '#ffffff'
+                                        }
+                                    }, function (error) {
+                                        if (error) {
+                                            console.error('خطأ في إنشاء QR Code:', error);
+                                            qrElement.innerHTML = '<p style="color: red;">❌ تعذر إنشاء QR Code</p>';
+                                        }
+                                    });
+                                } else {
+                                    console.error('عنصر QR Code غير موجود أو مكتبة QRCode غير محملة');
+                                }
+                            };
+                        <\/script>
                     </body>
                     </html>
                 `);
-                invoiceDetails.document.close();
+                invoiceWindow.document.close();
             }
 
-            deleteInvoice(invoiceNumber) {
-                if (confirm(`هل أنت متأكد من حذف الفاتورة ${invoiceNumber}؟`)) {
-                    this.invoices = this.invoices.filter(i => i.invoiceNumber !== invoiceNumber);
+            printInvoice(id) {
+                this.viewInvoice(id);
+            }
+
+            deleteInvoice(id) {
+                if (confirm('هل أنت متأكد من حذف هذه الفاتورة؟')) {
+                    this.invoices = this.invoices.filter(i => i.id !== id);
                     this.saveToStorage();
                     this.displayInvoices();
                     this.updateStats();
@@ -1292,54 +2185,498 @@
                 }
             }
 
-            exportInvoicesToExcel() {
+            exportInvoicesToPDF() {
                 if (this.invoices.length === 0) {
                     alert('❌ لا توجد فواتير لتصديرها');
                     return;
                 }
 
-                // إنشاء بيانات Excel
-                let csvContent = "رقم الفاتورة,تاريخ الفاتورة,تاريخ الاستحقاق,العميل,رقم الشحنة,الحالة,البنود,المبلغ الإجمالي,نسبة الضريبة,المبلغ الكلي,تاريخ الإنشاء\n";
-                
-                this.invoices.forEach(invoice => {
-                    const row = [
-                        invoice.invoiceNumber,
-                        invoice.invoiceDate,
-                        invoice.dueDate,
-                        invoice.clientName,
-                        invoice.shipmentNumber || '',
-                        this.getInvoiceStatusText(invoice.status),
-                        `"${invoice.items.replace(/"/g, '""')}"`,
-                        invoice.subtotal,
-                        invoice.taxRate,
-                        invoice.totalAmount,
-                        invoice.createdAt
-                    ];
-                    csvContent += row.join(',') + '\n';
-                });
-
-                // إنشاء ملف وتنزيله
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", "فواتير_" + new Date().toISOString().split('T')[0] + ".csv");
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                alert('✅ تم تصدير الفواتير بنجاح');
+                this.currentExportType = 'invoices';
+                this.currentExportData = this.invoices;
+                this.showPDFExportModal();
             }
 
-            getInvoiceStatusText(status) {
-                const statusMap = {
-                    'pending': 'قيد الانتظار',
-                    'paid': 'مدفوعة',
-                    'overdue': 'متأخرة',
-                    'cancelled': 'ملغاة'
+            addName() {
+                const nameType = document.getElementById('nameType').value;
+                const fullName = document.getElementById('fullName').value.trim();
+                const phoneNumber = document.getElementById('phoneNumber').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const position = document.getElementById('position').value.trim();
+                const department = document.getElementById('department').value.trim();
+                const notes = document.getElementById('notes').value.trim();
+
+                // التحقق من البيانات
+                if (!nameType || !fullName) {
+                    this.showMessage('nameMessage', '❌ يرجى ملء الحقول المطلوبة', 'error');
+                    return;
+                }
+
+                // إنشاء الاسم الجديد
+                const name = {
+                    id: Date.now(),
+                    nameType: nameType,
+                    fullName: fullName,
+                    phoneNumber: phoneNumber,
+                    email: email,
+                    position: position,
+                    department: department,
+                    notes: notes,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 };
-                return statusMap[status] || status;
+
+                this.names.push(name);
+                this.saveToStorage();
+                
+                this.showMessage('nameMessage', 
+                    `✅ تم إضافة الاسم ${fullName} بنجاح`, 
+                    'success');
+                this.clearForm('newNameForm');
+                this.hideNameForm();
+                this.displayNames();
+                this.updateStats();
+            }
+
+            loadNames() {
+                const password = document.getElementById('namesPassword').value;
+                
+                if (password !== this.systemPassword) {
+                    alert('❌ كلمة المرور غير صحيحة');
+                    return;
+                }
+
+                document.getElementById('namesContent').style.display = 'block';
+                this.displayNames();
+            }
+
+            displayNames() {
+                const listDiv = document.getElementById('namesList');
+                
+                if (this.names.length === 0) {
+                    listDiv.innerHTML = '<div class="alert alert-warning">لا توجد أسماء مسجلة</div>';
+                    return;
+                }
+
+                let html = '<h3>👥 قائمة الأسماء المسجلة</h3>';
+                
+                // تصنيف الأسماء حسب النوع
+                const nameTypes = {
+                    'employee': 'موظف',
+                    'supervisor': 'مشرف',
+                    'partner': 'شريك',
+                    'supplier': 'مورد'
+                };
+
+                const typeIcons = {
+                    'employee': '👨‍💼',
+                    'supervisor': '👨‍💼',
+                    'partner': '🤝',
+                    'supplier': '🏢'
+                };
+
+                // إنشاء جدول للأسماء
+                html += '<table class="name-table">';
+                html += '<tr><th>النوع</th><th>الاسم الكامل</th><th>رقم الهاتف</th><th>البريد الإلكتروني</th><th>المنصب</th><th>الإجراءات</th></tr>';
+                
+                this.names.forEach(name => {
+                    html += `
+                        <tr>
+                            <td>${typeIcons[name.nameType]} ${nameTypes[name.nameType]}</td>
+                            <td>${name.fullName}</td>
+                            <td>${name.phoneNumber || '-'}</td>
+                            <td>${name.email || '-'}</td>
+                            <td>${name.position || '-'}</td>
+                            <td>
+                                <button class="btn btn-warning" onclick="viewName(${name.id})">👁️ عرض</button>
+                                <button class="btn btn-danger" onclick="deleteName(${name.id})">🗑️ حذف</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</table>';
+
+                listDiv.innerHTML = html;
+            }
+
+            viewName(id) {
+                const name = this.names.find(n => n.id === id);
+                if (!name) return;
+
+                const nameTypes = {
+                    'employee': 'موظف',
+                    'supervisor': 'مشرف',
+                    'partner': 'شريك',
+                    'supplier': 'مورد'
+                };
+
+                const typeIcons = {
+                    'employee': '👨‍💼',
+                    'supervisor': '👨‍💼',
+                    'partner': '🤝',
+                    'supplier': '🏢'
+                };
+
+                let html = `
+                    <div class="name-card">
+                        <h3>${typeIcons[name.nameType]} تفاصيل الاسم: ${name.fullName}</h3>
+                        <div class="row">
+                            <div class="col">
+                                <strong>النوع:</strong> ${nameTypes[name.nameType]}<br>
+                                <strong>الاسم الكامل:</strong> ${name.fullName}<br>
+                                <strong>رقم الهاتف:</strong> ${name.phoneNumber || 'غير متوفر'}<br>
+                            </div>
+                            <div class="col">
+                                <strong>البريد الإلكتروني:</strong> ${name.email || 'غير متوفر'}<br>
+                                <strong>المنصب:</strong> ${name.position || 'غير محدد'}<br>
+                                <strong>القسم:</strong> ${name.department || 'غير محدد'}<br>
+                            </div>
+                        </div>
+                        ${name.notes ? `
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col">
+                                <strong>ملاحظات:</strong><br>
+                                ${name.notes}
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col">
+                                <button class="btn btn-warning" onclick="editName(${name.id})">✏️ تعديل</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // إنشاء نافذة عرض الاسم
+                const nameDetails = window.open('', '_blank', 'width=800,height=600');
+                nameDetails.document.write(`
+                    <html dir="rtl">
+                    <head>
+                        <title>${name.fullName}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .name-header { text-align: center; margin-bottom: 30px; }
+                            .name-details { margin-bottom: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th, td { padding: 10px; border: 1px solid #ddd; text-align: right; }
+                            th { background-color: #f5f5f5; }
+                            @media print {
+                                button { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="name-header">
+                            <h1>${typeIcons[name.nameType]} ${name.fullName}</h1>
+                        </div>
+                        <div class="name-details">
+                            <p><strong>النوع:</strong> ${nameTypes[name.nameType]}</p>
+                            <p><strong>رقم الهاتف:</strong> ${name.phoneNumber || 'غير متوفر'}</p>
+                            <p><strong>البريد الإلكتروني:</strong> ${name.email || 'غير متوفر'}</p>
+                            <p><strong>المنصب:</strong> ${name.position || 'غير محدد'}</p>
+                            <p><strong>القسم:</strong> ${name.department || 'غير محدد'}</p>
+                            ${name.notes ? `<p><strong>ملاحظات:</strong> ${name.notes}</p>` : ''}
+                        </div>
+                        <br>
+                        <button onclick="window.print()">🖨️ طباعة</button>
+                        <button onclick="window.close()">إغلاق</button>
+                    </body>
+                    </html>
+                `);
+                nameDetails.document.close();
+            }
+
+            deleteName(id) {
+                if (confirm('هل أنت متأكد من حذف هذا الاسم؟')) {
+                    this.names = this.names.filter(n => n.id !== id);
+                    this.saveToStorage();
+                    this.displayNames();
+                    this.updateStats();
+                    alert('✅ تم حذف الاسم بنجاح');
+                }
+            }
+
+            deleteAllNames() {
+                if (confirm('هل أنت متأكد من حذف جميع الأسماء؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                    this.names = [];
+                    this.saveToStorage();
+                    this.displayNames();
+                    this.updateStats();
+                    alert('✅ تم حذف جميع الأسماء بنجاح');
+                }
+            }
+
+            exportNamesToPDF() {
+                if (this.names.length === 0) {
+                    alert('❌ لا توجد أسماء لتصديرها');
+                    return;
+                }
+
+                this.currentExportType = 'names';
+                this.currentExportData = this.names;
+                this.showPDFExportModal();
+            }
+
+            addInventoryItem() {
+                const productName = document.getElementById('productName').value.trim();
+                const productCode = document.getElementById('productCode').value.trim();
+                const productCategory = document.getElementById('productCategory').value;
+                const productQuantity = parseInt(document.getElementById('productQuantity').value);
+                const productPrice = parseFloat(document.getElementById('productPrice').value);
+                const sellingPrice = parseFloat(document.getElementById('sellingPrice').value);
+                const productDescription = document.getElementById('productDescription').value.trim();
+                const supplierName = document.getElementById('supplierName').value.trim();
+
+                // التحقق من البيانات
+                if (!productName || !productCode || !productCategory || !productQuantity || !productPrice || !sellingPrice) {
+                    this.showMessage('inventoryMessage', '❌ يرجى ملء جميع الحقول المطلوبة', 'error');
+                    return;
+                }
+
+                if (productQuantity < 0 || productPrice < 0 || sellingPrice < 0) {
+                    this.showMessage('inventoryMessage', '❌ يرجى إدخال قيم صحيحة', 'error');
+                    return;
+                }
+
+                // البحث عن المنتج بنفس الكود
+                const existingProduct = this.inventory.find(i => i.productCode === productCode);
+                if (existingProduct) {
+                    this.showMessage('inventoryMessage', '❌ كود المنتج موجود مسبقاً', 'error');
+                    return;
+                }
+
+                // تحديد حالة المخزون
+                let stockStatus = 'in_stock';
+                if (productQuantity === 0) {
+                    stockStatus = 'out_of_stock';
+                } else if (productQuantity < 10) {
+                    stockStatus = 'low_stock';
+                }
+
+                // إنشاء المنتج الجديد
+                const inventoryItem = {
+                    id: Date.now(),
+                    productName: productName,
+                    productCode: productCode,
+                    productCategory: productCategory,
+                    productQuantity: productQuantity,
+                    productPrice: productPrice,
+                    sellingPrice: sellingPrice,
+                    productDescription: productDescription,
+                    supplierName: supplierName,
+                    stockStatus: stockStatus,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+
+                this.inventory.push(inventoryItem);
+                this.saveToStorage();
+                
+                this.showMessage('inventoryMessage', 
+                    `✅ تم إضافة المنتج ${productName} بنجاح`, 
+                    'success');
+                this.clearForm('newInventoryForm');
+                this.hideInventoryForm();
+                this.displayInventory();
+                this.updateStats();
+            }
+
+            loadInventory() {
+                const password = document.getElementById('inventoryPassword').value;
+                
+                if (password !== this.systemPassword) {
+                    alert('❌ كلمة المرور غير صحيحة');
+                    return;
+                }
+
+                document.getElementById('inventoryContent').style.display = 'block';
+                this.displayInventory();
+            }
+
+            displayInventory() {
+                const listDiv = document.getElementById('inventoryList');
+                
+                if (this.inventory.length === 0) {
+                    listDiv.innerHTML = '<div class="alert alert-warning">لا توجد منتجات في المخزون</div>';
+                    return;
+                }
+
+                let html = '<h3>📦 قائمة المنتجات في المخزون</h3>';
+                
+                // إنشاء جدول للمخزون
+                html += '<table class="inventory-table">';
+                html += '<tr><th>اسم المنتج</th><th>كود المنتج</th><th>الفئة</th><th>الكمية</th><th>سعر الشراء</th><th>سعر البيع</th><th>الحالة</th><th>الإجراءات</th></tr>';
+                
+                this.inventory.forEach(item => {
+                    const statusText = {
+                        'in_stock': 'متوفر',
+                        'low_stock': 'كمية قليلة',
+                        'out_of_stock': 'غير متوفر'
+                    };
+                    
+                    const statusClass = {
+                        'in_stock': 'badge-success',
+                        'low_stock': 'badge-warning',
+                        'out_of_stock': 'badge-danger'
+                    };
+                    
+                    html += `
+                        <tr>
+                            <td>${item.productName}</td>
+                            <td>${item.productCode}</td>
+                            <td>${this.getCategoryText(item.productCategory)}</td>
+                            <td>${item.productQuantity}</td>
+                            <td>${item.productPrice.toFixed(2)} ريال</td>
+                            <td>${item.sellingPrice.toFixed(2)} ريال</td>
+                            <td><span class="badge ${statusClass[item.stockStatus]}">${statusText[item.stockStatus]}</span></td>
+                            <td>
+                                <button class="btn btn-warning" onclick="viewInventoryItem(${item.id})">👁️ عرض</button>
+                                <button class="btn btn-danger" onclick="deleteInventoryItem(${item.id})">🗑️ حذف</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</table>';
+
+                listDiv.innerHTML = html;
+            }
+
+            getCategoryText(category) {
+                const categories = {
+                    'electronics': 'إلكترونيات',
+                    'clothing': 'ملابس',
+                    'food': 'مواد غذائية',
+                    'tools': 'أدوات',
+                    'other': 'أخرى'
+                };
+                return categories[category] || category;
+            }
+
+            viewInventoryItem(id) {
+                const item = this.inventory.find(i => i.id === id);
+                if (!item) return;
+
+                const statusText = {
+                    'in_stock': 'متوفر',
+                    'low_stock': 'كمية قليلة',
+                    'out_of_stock': 'غير متوفر'
+                };
+                
+                const statusClass = {
+                    'in_stock': 'badge-success',
+                    'low_stock': 'badge-warning',
+                    'out_of_stock': 'badge-danger'
+                };
+
+                let html = `
+                    <div class="inventory-card">
+                        <h3>📦 تفاصيل المنتج: ${item.productName}</h3>
+                        <div class="row">
+                            <div class="col">
+                                <strong>اسم المنتج:</strong> ${item.productName}<br>
+                                <strong>كود المنتج:</strong> ${item.productCode}<br>
+                                <strong>الفئة:</strong> ${this.getCategoryText(item.productCategory)}<br>
+                                <strong>الكمية:</strong> ${item.productQuantity}
+                            </div>
+                            <div class="col">
+                                <strong>سعر الشراء:</strong> ${item.productPrice.toFixed(2)} ريال<br>
+                                <strong>سعر البيع:</strong> ${item.sellingPrice.toFixed(2)} ريال<br>
+                                <strong>الحالة:</strong> <span class="badge ${statusClass[item.stockStatus]}">${statusText[item.stockStatus]}</span><br>
+                                <strong>المورد:</strong> ${item.supplierName || 'غير محدد'}
+                            </div>
+                        </div>
+                        ${item.productDescription ? `
+                        <div class="row" style="margin-top: 15px;">
+                            <div class="col">
+                                <strong>وصف المنتج:</strong><br>
+                                ${item.productDescription}
+                            </div>
+                        </div>
+                        ` : ''}
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col">
+                                <button class="btn btn-warning" onclick="editInventoryItem(${item.id})">✏️ تعديل</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // إنشاء نافذة عرض المنتج
+                const itemDetails = window.open('', '_blank', 'width=800,height=600');
+                itemDetails.document.write(`
+                    <html dir="rtl">
+                    <head>
+                        <title>${item.productName}</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .item-header { text-align: center; margin-bottom: 30px; }
+                            .item-details { margin-bottom: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                            th, td { padding: 10px; border: 1px solid #ddd; text-align: right; }
+                            th { background-color: #f5f5f5; }
+                            .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8em; font-weight: bold; }
+                            .badge-success { background: #e8f5e9; color: #2e7d32; }
+                            .badge-warning { background: #fff3e0; color: #ef6c00; }
+                            .badge-danger { background: #ffebee; color: #c62828; }
+                            @media print {
+                                button { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="item-header">
+                            <h1>${item.productName}</h1>
+                        </div>
+                        <div class="item-details">
+                            <p><strong>كود المنتج:</strong> ${item.productCode}</p>
+                            <p><strong>الفئة:</strong> ${this.getCategoryText(item.productCategory)}</p>
+                            <p><strong>الكمية:</strong> ${item.productQuantity}</p>
+                            <p><strong>سعر الشراء:</strong> ${item.productPrice.toFixed(2)} ريال</p>
+                            <p><strong>سعر البيع:</strong> ${item.sellingPrice.toFixed(2)} ريال</p>
+                            <p><strong>الحالة:</strong> <span class="badge ${statusClass[item.stockStatus]}">${statusText[item.stockStatus]}</span></p>
+                            <p><strong>المورد:</strong> ${item.supplierName || 'غير محدد'}</p>
+                            ${item.productDescription ? `<p><strong>وصف المنتج:</strong> ${item.productDescription}</p>` : ''}
+                        </div>
+                        <br>
+                        <button onclick="window.print()">🖨️ طباعة</button>
+                        <button onclick="window.close()">إغلاق</button>
+                    </body>
+                    </html>
+                `);
+                itemDetails.document.close();
+            }
+
+            deleteInventoryItem(id) {
+                if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
+                    this.inventory = this.inventory.filter(i => i.id !== id);
+                    this.saveToStorage();
+                    this.displayInventory();
+                    this.updateStats();
+                    alert('✅ تم حذف المنتج بنجاح');
+                }
+            }
+
+            deleteAllInventory() {
+                if (confirm('هل أنت متأكد من حذف جميع المنتجات؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                    this.inventory = [];
+                    this.saveToStorage();
+                    this.displayInventory();
+                    this.updateStats();
+                    alert('✅ تم حذف جميع المنتجات بنجاح');
+                }
+            }
+
+            exportInventoryToPDF() {
+                if (this.inventory.length === 0) {
+                    alert('❌ لا توجد منتجات لتصديرها');
+                    return;
+                }
+
+                this.currentExportType = 'inventory';
+                this.currentExportData = this.inventory;
+                this.showPDFExportModal();
             }
 
             loadReports() {
@@ -1357,34 +2694,68 @@
             displayReports() {
                 const statsDiv = document.getElementById('reportsStats');
                 const listDiv = document.getElementById('shipmentsList');
-
-                // الإحصائيات
-                const total = this.shipments.length;
-                const active = this.shipments.filter(s => s.status === 'active').length;
-                const completed = this.shipments.filter(s => s.status === 'completed').length;
-                const matching = this.shipments.filter(s => s.comparison && s.comparison.weightMatch && s.comparison.detailsMatch).length;
-                const mismatched = this.shipments.filter(s => s.comparison && (!s.comparison.weightMatch || !s.comparison.detailsMatch)).length;
-
+                
+                // إحصائيات الشحنات
+                const totalShipments = this.shipments.length;
+                const activeShipments = this.shipments.filter(s => s.status === 'active').length;
+                const completedShipments = this.shipments.filter(s => s.status === 'completed').length;
+                
                 statsDiv.innerHTML = `
                     <div class="stat-card">
-                        <div class="stat-number">${total}</div>
+                        <div class="stat-number">${totalShipments}</div>
                         <div class="stat-label">إجمالي الشحنات</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${active}</div>
-                        <div class="stat-label">نشطة</div>
+                        <div class="stat-number">${activeShipments}</div>
+                        <div class="stat-label">شحنات نشطة</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${completed}</div>
-                        <div class="stat-label">مكتملة</div>
+                        <div class="stat-number">${completedShipments}</div>
+                        <div class="stat-label">شحنات مكتملة</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-number">${matching}</div>
-                        <div class="stat-label">متطابقة</div>
+                        <div class="stat-number">${this.invoices.length}</div>
+                        <div class="stat-label">إجمالي الفواتير</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${this.inventory.length}</div>
+                        <div class="stat-label">عناصر المخزون</div>
                     </div>
                 `;
+                
+                // عرض قائمة الشحنات
+                if (this.shipments.length === 0) {
+                    listDiv.innerHTML = '<div class="alert alert-warning">لا توجد شحنات مسجلة</div>';
+                    return;
+                }
+                
+                let html = '<h3>📦 قائمة الشحنات</h3>';
+                
+                // إنشاء جدول للشحنات
+                html += '<table class="invoice-table">';
+                html += '<tr><th>رقم الشحنة</th><th>عدد الأطراف</th><th>الحالة</th><th>التاريخ</th><th>الإجراءات</th></tr>';
+                
+                this.shipments.forEach(shipment => {
+                    const statusIcon = shipment.status === 'active' ? '⏳' : '✅';
+                    const statusText = this.getShipmentStatusText(shipment.status);
+                    
+                    html += `
+                        <tr>
+                            <td>${shipment.shipmentNumber}</td>
+                            <td>${shipment.parties.length}</td>
+                            <td>${statusIcon} ${statusText}</td>
+                            <td>${new Date(shipment.createdAt).toLocaleDateString('ar-SA')}</td>
+                            <td>
+                                <button class="btn btn-warning" onclick="viewShipmentParties(${shipment.id})">👁️ عرض التفاصيل</button>
+                                <button class="btn btn-danger" onclick="deleteShipment(${shipment.id})">🗑️ حذف</button>
+                            </td>
+                        </tr>
+                    `;
+                });
 
-                this.filterShipments();
+                html += '</table>';
+
+                listDiv.innerHTML = html;
             }
 
             filterShipments() {
@@ -1392,159 +2763,47 @@
                 const listDiv = document.getElementById('shipmentsList');
                 
                 let filteredShipments = this.shipments;
+                
                 if (filterStatus !== 'all') {
-                    if (filterStatus === 'active') {
-                        filteredShipments = this.shipments.filter(s => s.status === 'active');
-                    } else if (filterStatus === 'completed') {
-                        filteredShipments = this.shipments.filter(s => s.status === 'completed');
-                    } else if (filterStatus === 'matching') {
-                        filteredShipments = this.shipments.filter(s => s.comparison && s.comparison.weightMatch && s.comparison.detailsMatch);
-                    } else if (filterStatus === 'mismatched') {
-                        filteredShipments = this.shipments.filter(s => s.comparison && (!s.comparison.weightMatch || !s.comparison.detailsMatch));
-                    }
+                    filteredShipments = this.shipments.filter(shipment => {
+                        if (filterStatus === 'active') return shipment.status === 'active';
+                        if (filterStatus === 'completed') return shipment.status === 'completed';
+                        return true;
+                    });
                 }
-
+                
                 if (filteredShipments.length === 0) {
                     listDiv.innerHTML = '<div class="alert alert-warning">لا توجد شحنات تطابق معايير التصفية</div>';
-                    document.getElementById('comparisonDetails').style.display = 'none';
                     return;
                 }
-
-                let html = '<h3>📋 قائمة الشحنات - للمراجعة</h3>';
+                
+                let html = '<h3>📦 قائمة الشحنات</h3>';
+                
+                // إنشاء جدول للشحنات
+                html += '<table class="invoice-table">';
+                html += '<tr><th>رقم الشحنة</th><th>عدد الأطراف</th><th>الحالة</th><th>التاريخ</th><th>الإجراءات</th></tr>';
+                
                 filteredShipments.forEach(shipment => {
-                    const statusIcon = shipment.status === 'completed' ? '✅' : '⏳';
-                    const isMatching = shipment.comparison && shipment.comparison.weightMatch && shipment.comparison.detailsMatch;
-                    const matchStatus = shipment.status === 'completed' ? 
-                        (isMatching ? '✅ متطابقة' : '❌ غير متطابقة') : '⏳ قيد المعالجة';
+                    const statusIcon = shipment.status === 'active' ? '⏳' : '✅';
+                    const statusText = this.getShipmentStatusText(shipment.status);
                     
                     html += `
-                        <div class="shipment-card">
-                            <div class="row">
-                                <div class="col">
-                                    <strong>${statusIcon} شحنة: ${shipment.shipmentNumber}</strong><br>
-                                    <small>الحالة: ${this.getStatusText(shipment.status)}</small><br>
-                                    <small>التاريخ: ${new Date(shipment.createdAt).toLocaleDateString('ar-SA')}</small>
-                                </div>
-                                <div class="col">
-                                    <strong>الطرف الأول:</strong> ${shipment.party1Name || 'لم يدخل'}<br>
-                                    <strong>الطرف الثاني:</strong> ${shipment.party2Name || 'لم يدخل'}<br>
-                                    <strong>الوزن:</strong> ${shipment.weight1 ? shipment.weight1 + ' كجم' : 'لم يدخل'} ${shipment.weight2 ? `/ ${shipment.weight2} كجم` : ''}
-                                </div>
-                            </div>
-                            ${shipment.status === 'completed' ? `
-                            <div class="row" style="margin-top: 10px; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                                <div class="col">
-                                    <strong>نتيجة المقارنة:</strong> ${matchStatus}<br>
-                                    ${shipment.comparison ? `
-                                    • الوزن: ${shipment.comparison.weightMatch ? '✅ متطابق' : '❌ غير متطابق'}<br>
-                                    • التفاصيل: ${shipment.comparison.detailsMatch ? '✅ متطابق' : '❌ غير متطابق'}
-                                    ` : ''}
-                                </div>
-                            </div>
-                            ` : ''}
-                            <div class="row" style="margin-top: 10px;">
-                                <div class="col">
-                                    <button class="btn btn-warning" onclick="showComparison('${shipment.shipmentNumber}')">🔍 عرض التفاصيل</button>
-                                    <button class="btn btn-danger" onclick="deleteShipment('${shipment.shipmentNumber}')">🗑️ حذف</button>
-                                </div>
-                            </div>
-                        </div>
+                        <tr>
+                            <td>${shipment.shipmentNumber}</td>
+                            <td>${shipment.parties.length}</td>
+                            <td>${statusIcon} ${statusText}</td>
+                            <td>${new Date(shipment.createdAt).toLocaleDateString('ar-SA')}</td>
+                            <td>
+                                <button class="btn btn-warning" onclick="viewShipmentParties(${shipment.id})">👁️ عرض التفاصيل</button>
+                                <button class="btn btn-danger" onclick="deleteShipment(${shipment.id})">🗑️ حذف</button>
+                            </td>
+                        </tr>
                     `;
                 });
 
+                html += '</table>';
+
                 listDiv.innerHTML = html;
-            }
-
-            showComparison(shipmentNumber) {
-                const shipment = this.shipments.find(s => s.shipmentNumber === shipmentNumber);
-                if (!shipment) return;
-
-                const comparisonDiv = document.getElementById('comparisonContent');
-                document.getElementById('comparisonDetails').style.display = 'block';
-
-                let html = `
-                    <div class="shipment-card">
-                        <h4>📦 مقارنة الشحنة: ${shipmentNumber}</h4>
-                        <div class="row">
-                            <div class="col">
-                `;
-
-                if (shipment.weight1) {
-                    html += `
-                                <div class="alert alert-info">
-                                    <h5>👤 بيانات الطرف الأول:</h5>
-                                    <strong>الوزن:</strong> ${shipment.weight1} كجم<br>
-                                    <strong>التفاصيل:</strong> ${shipment.details1}<br>
-                                    <strong>الطرف:</strong> ${shipment.party1Name}<br>
-                                    <strong>وقت الإدخال:</strong> ${new Date(shipment.createdAt).toLocaleString('ar-SA')}
-                                </div>
-                    `;
-                } else {
-                    html += `
-                                <div class="alert alert-warning">
-                                    <h5>👤 بيانات الطرف الأول:</h5>
-                                    ⏳ في انتظار إدخال بيانات الطرف الأول
-                                </div>
-                    `;
-                }
-
-                html += `
-                            </div>
-                            <div class="col">
-                `;
-
-                if (shipment.weight2) {
-                    html += `
-                                <div class="alert alert-info">
-                                    <h5>👥 بيانات الطرف الثاني:</h5>
-                                    <strong>الوزن:</strong> ${shipment.weight2} كجم<br>
-                                    <strong>التفاصيل:</strong> ${shipment.details2}<br>
-                                    <strong>الطرف:</strong> ${shipment.party2Name}<br>
-                                    <strong>وقت الإدخال:</strong> ${new Date(shipment.updatedAt).toLocaleString('ar-SA')}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    html += `
-                                <div class="alert alert-warning">
-                                    <h5>👥 بيانات الطرف الثاني:</h5>
-                                    ⏳ في انتظار إدخال بيانات الطرف الثاني
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                if (shipment.status === 'completed' && shipment.comparison) {
-                    html += `
-                        <div class="comparison-result ${shipment.comparison.weightMatch && shipment.comparison.detailsMatch ? 'match' : 'mismatch'}">
-                            ${shipment.comparison.weightMatch && shipment.comparison.detailsMatch ? '🎉 البيانات متطابقة تماماً' : '❌ هناك اختلاف في البيانات'}
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <strong>تفاصيل المقارنة:</strong><br>
-                                • الوزن: ${shipment.comparison.weightMatch ? '✅ متطابق' : `❌ غير متطابق (فرق: ${Math.abs(shipment.comparison.weightDifference).toFixed(2)} كجم)`}<br>
-                                • التفاصيل: ${shipment.comparison.detailsMatch ? '✅ متطابق' : '❌ غير متطابق'}
-                            </div>
-                        </div>
-                    `;
-                }
-
-                comparisonDiv.innerHTML = html;
-
-                // التمرير إلى قسم المقارنة
-                document.getElementById('comparisonDetails').scrollIntoView({ behavior: 'smooth' });
-            }
-
-            deleteShipment(shipmentNumber) {
-                if (confirm(`هل أنت متأكد من حذف الشحنة ${shipmentNumber}؟`)) {
-                    this.shipments = this.shipments.filter(s => s.shipmentNumber !== shipmentNumber);
-                    this.saveToStorage();
-                    this.displayReports();
-                    this.updateStats();
-                    alert('✅ تم حذف الشحنة بنجاح');
-                }
             }
 
             deleteAllShipments() {
@@ -1557,106 +2816,496 @@
                 }
             }
 
-            exportToExcel() {
+            exportToPDF() {
                 if (this.shipments.length === 0) {
-                    alert('❌ لا توجد بيانات لتصديرها');
+                    alert('❌ لا توجد شحنات لتصديرها');
                     return;
                 }
 
-                // إنشاء بيانات Excel
-                let csvContent = "رقم الشحنة,الطرف الأول,الطرف الثاني,وزن الطرف الأول,وزن الطرف الثاني,تفاصيل الطرف الأول,تفاصيل الطرف الثاني,الحالة,تاريخ الإنشاء,تاريخ التحديث\n";
-                
-                this.shipments.forEach(shipment => {
-                    const row = [
-                        shipment.shipmentNumber,
-                        shipment.party1Name || '',
-                        shipment.party2Name || '',
-                        shipment.weight1 || '',
-                        shipment.weight2 || '',
-                        `"${(shipment.details1 || '').replace(/"/g, '""')}"`,
-                        `"${(shipment.details2 || '').replace(/"/g, '""')}"`,
-                        this.getStatusText(shipment.status),
-                        shipment.createdAt,
-                        shipment.updatedAt
-                    ];
-                    csvContent += row.join(',') + '\n';
-                });
-
-                // إنشاء ملف وتنزيله
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement("a");
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", "شحنات_" + new Date().toISOString().split('T')[0] + ".csv");
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                alert('✅ تم تصدير البيانات بنجاح');
+                this.currentExportType = 'shipments';
+                this.currentExportData = this.shipments;
+                this.showPDFExportModal();
             }
 
-            changePassword(currentPassword, newPassword, confirmPassword) {
+            showPDFExportModal() {
+                // إعادة تعيين النموذج
+                document.getElementById('pdfExportForm').reset();
+                document.getElementById('logoPreview').innerHTML = '';
+                
+                // تعيين عنوان افتراضي حسب نوع البيانات
+                let defaultTitle = '';
+                switch(this.currentExportType) {
+                    case 'shipments':
+                        defaultTitle = 'تقرير الشحنات';
+                        break;
+                    case 'invoices':
+                        defaultTitle = 'تقرير الفواتير';
+                        break;
+                    case 'names':
+                        defaultTitle = 'تقرير الأسماء';
+                        break;
+                    case 'inventory':
+                        defaultTitle = 'تقرير المخزون';
+                        break;
+                    case 'shipment':
+                        defaultTitle = `تقرير الشحنة ${this.currentExportData.shipmentNumber}`;
+                        break;
+                }
+                
+                document.getElementById('exportTitle').value = defaultTitle;
+                document.getElementById('pdfExportModal').style.display = 'flex';
+            }
+
+            closePDFExportModal() {
+                document.getElementById('pdfExportModal').style.display = 'none';
+            }
+
+            generatePDF() {
+                const companyName = document.getElementById('exportCompanyName').value.trim();
+                const exportTitle = document.getElementById('exportTitle').value.trim();
+                const exportNotes = document.getElementById('exportNotes').value.trim();
+                const logoFile = document.getElementById('exportCompanyLogo').files[0];
+
+                if (!companyName) {
+                    alert('❌ يرجى إدخال اسم الشركة أو المتجر');
+                    return;
+                }
+
+                // معالجة صورة الشعار
+                if (logoFile) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.createPDFDocument(companyName, exportTitle, exportNotes, e.target.result);
+                    };
+                    reader.readAsDataURL(logoFile);
+                } else {
+                    this.createPDFDocument(companyName, exportTitle, exportNotes, '');
+                }
+            }
+
+            createPDFDocument(companyName, title, notes, logoBase64) {
+                // إنشاء مستند PDF جديد
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // إعدادات المستند
+                doc.setR2L(true); // للغة العربية
+                doc.setFont('Times', 'normal');
+                
+                // إضافة الشعار إذا كان موجوداً
+                let yPosition = 20;
+                if (logoBase64) {
+                    doc.addImage(logoBase64, 'PNG', 170, 10, 30, 30);
+                }
+                
+                // عنوان التقرير
+                doc.setFontSize(20);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text(title || 'تقرير', 105, yPosition, { align: 'center' });
+                yPosition += 15;
+                
+                // اسم الشركة
+                doc.setFontSize(16);
+                doc.setTextColor(57, 73, 171); // لون أزرق متوسط
+                doc.text(companyName, 105, yPosition, { align: 'center' });
+                yPosition += 10;
+                
+                // تاريخ التقرير
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100); // لون رمادي
+                const today = new Date().toLocaleDateString('ar-SA');
+                doc.text(`تاريخ التقرير: ${today}`, 105, yPosition, { align: 'center' });
+                yPosition += 20;
+                
+                // ملاحظات إضافية إذا كانت موجودة
+                if (notes) {
+                    doc.setFontSize(12);
+                    doc.setTextColor(0, 0, 0); // لون أسود
+                    const splitNotes = doc.splitTextToSize(notes, 180);
+                    doc.text(splitNotes, 105, yPosition, { align: 'center' });
+                    yPosition += splitNotes.length * 7 + 10;
+                }
+                
+                // إضافة البيانات حسب النوع
+                switch(this.currentExportType) {
+                    case 'shipments':
+                        this.addShipmentsToPDF(doc, yPosition);
+                        break;
+                    case 'invoices':
+                        this.addInvoicesToPDF(doc, yPosition);
+                        break;
+                    case 'names':
+                        this.addNamesToPDF(doc, yPosition);
+                        break;
+                    case 'inventory':
+                        this.addInventoryToPDF(doc, yPosition);
+                        break;
+                    case 'shipment':
+                        this.addSingleShipmentToPDF(doc, yPosition);
+                        break;
+                }
+                
+                // حفظ الملف
+                const fileName = `${title || 'تقرير'}_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                // إغلاق النافذة المنبثقة
+                this.closePDFExportModal();
+                
+                alert('✅ تم إنشاء ملف PDF بنجاح');
+            }
+
+            addShipmentsToPDF(doc, yPosition) {
+                // عنوان القسم
+                doc.setFontSize(16);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text('قائمة الشحنات', 105, yPosition, { align: 'center' });
+                yPosition += 15;
+                
+                // رؤوس الجدول
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255); // لون أبيض
+                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.rect(10, yPosition, 190, 10, 'F');
+                doc.text('رقم الشحنة', 190, yPosition + 7, { align: 'right' });
+                doc.text('عدد الأطراف', 150, yPosition + 7, { align: 'right' });
+                doc.text('الحالة', 110, yPosition + 7, { align: 'right' });
+                doc.text('التاريخ', 70, yPosition + 7, { align: 'right' });
+                yPosition += 15;
+                
+                // بيانات الشحنات
+                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setFontSize(9);
+                
+                this.shipments.forEach((shipment, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text(shipment.shipmentNumber, 190, yPosition, { align: 'right' });
+                    doc.text(shipment.parties.length.toString(), 150, yPosition, { align: 'right' });
+                    doc.text(this.getShipmentStatusText(shipment.status), 110, yPosition, { align: 'right' });
+                    doc.text(new Date(shipment.createdAt).toLocaleDateString('ar-SA'), 70, yPosition, { align: 'right' });
+                    
+                    yPosition += 8;
+                    
+                    // خط فاصل بين الصفوف
+                    if (index < this.shipments.length - 1) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(10, yPosition, 200, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            }
+
+            addInvoicesToPDF(doc, yPosition) {
+                // عنوان القسم
+                doc.setFontSize(16);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text('قائمة الفواتير', 105, yPosition, { align: 'center' });
+                yPosition += 15;
+                
+                // رؤوس الجدول
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255); // لون أبيض
+                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.rect(10, yPosition, 190, 10, 'F');
+                doc.text('رقم الفاتورة', 190, yPosition + 7, { align: 'right' });
+                doc.text('اسم العميل', 150, yPosition + 7, { align: 'right' });
+                doc.text('التاريخ', 110, yPosition + 7, { align: 'right' });
+                doc.text('المبلغ', 70, yPosition + 7, { align: 'right' });
+                doc.text('الحالة', 40, yPosition + 7, { align: 'right' });
+                yPosition += 15;
+                
+                // بيانات الفواتير
+                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setFontSize(9);
+                
+                this.invoices.forEach((invoice, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text(invoice.invoiceNumber, 190, yPosition, { align: 'right' });
+                    doc.text(invoice.clientName, 150, yPosition, { align: 'right' });
+                    doc.text(invoice.invoiceDate, 110, yPosition, { align: 'right' });
+                    doc.text(`${invoice.totalAmount.toFixed(2)} ريال`, 70, yPosition, { align: 'right' });
+                    doc.text(this.getInvoiceStatusText(invoice.invoiceStatus), 40, yPosition, { align: 'right' });
+                    
+                    yPosition += 8;
+                    
+                    // خط فاصل بين الصفوف
+                    if (index < this.invoices.length - 1) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(10, yPosition, 200, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            }
+
+            addNamesToPDF(doc, yPosition) {
+                // عنوان القسم
+                doc.setFontSize(16);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text('قائمة الأسماء', 105, yPosition, { align: 'center' });
+                yPosition += 15;
+                
+                // رؤوس الجدول
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255); // لون أبيض
+                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.rect(10, yPosition, 190, 10, 'F');
+                doc.text('النوع', 190, yPosition + 7, { align: 'right' });
+                doc.text('الاسم الكامل', 150, yPosition + 7, { align: 'right' });
+                doc.text('رقم الهاتف', 110, yPosition + 7, { align: 'right' });
+                doc.text('البريد الإلكتروني', 70, yPosition + 7, { align: 'right' });
+                doc.text('المنصب', 40, yPosition + 7, { align: 'right' });
+                yPosition += 15;
+                
+                // بيانات الأسماء
+                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setFontSize(9);
+                
+                const nameTypes = {
+                    'employee': 'موظف',
+                    'supervisor': 'مشرف',
+                    'partner': 'شريك',
+                    'supplier': 'مورد'
+                };
+                
+                this.names.forEach((name, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text(nameTypes[name.nameType] || name.nameType, 190, yPosition, { align: 'right' });
+                    doc.text(name.fullName, 150, yPosition, { align: 'right' });
+                    doc.text(name.phoneNumber || '-', 110, yPosition, { align: 'right' });
+                    doc.text(name.email || '-', 70, yPosition, { align: 'right' });
+                    doc.text(name.position || '-', 40, yPosition, { align: 'right' });
+                    
+                    yPosition += 8;
+                    
+                    // خط فاصل بين الصفوف
+                    if (index < this.names.length - 1) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(10, yPosition, 200, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            }
+
+            addInventoryToPDF(doc, yPosition) {
+                // عنوان القسم
+                doc.setFontSize(16);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text('قائمة المخزون', 105, yPosition, { align: 'center' });
+                yPosition += 15;
+                
+                // رؤوس الجدول
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255); // لون أبيض
+                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.rect(10, yPosition, 190, 10, 'F');
+                doc.text('اسم المنتج', 190, yPosition + 7, { align: 'right' });
+                doc.text('كود المنتج', 150, yPosition + 7, { align: 'right' });
+                doc.text('الفئة', 110, yPosition + 7, { align: 'right' });
+                doc.text('الكمية', 80, yPosition + 7, { align: 'right' });
+                doc.text('سعر البيع', 50, yPosition + 7, { align: 'right' });
+                doc.text('الحالة', 30, yPosition + 7, { align: 'right' });
+                yPosition += 15;
+                
+                // بيانات المخزون
+                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setFontSize(9);
+                
+                const statusText = {
+                    'in_stock': 'متوفر',
+                    'low_stock': 'كمية قليلة',
+                    'out_of_stock': 'غير متوفر'
+                };
+                
+                this.inventory.forEach((item, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text(item.productName, 190, yPosition, { align: 'right' });
+                    doc.text(item.productCode, 150, yPosition, { align: 'right' });
+                    doc.text(this.getCategoryText(item.productCategory), 110, yPosition, { align: 'right' });
+                    doc.text(item.productQuantity.toString(), 80, yPosition, { align: 'right' });
+                    doc.text(`${item.sellingPrice.toFixed(2)} ريال`, 50, yPosition, { align: 'right' });
+                    doc.text(statusText[item.stockStatus], 30, yPosition, { align: 'right' });
+                    
+                    yPosition += 8;
+                    
+                    // خط فاصل بين الصفوف
+                    if (index < this.inventory.length - 1) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(10, yPosition, 200, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            }
+
+            addSingleShipmentToPDF(doc, yPosition) {
+                const shipment = this.currentExportData;
+                
+                // عنوان القسم
+                doc.setFontSize(16);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text(`تفاصيل الشحنة: ${shipment.shipmentNumber}`, 105, yPosition, { align: 'center' });
+                yPosition += 15;
+                
+                // معلومات الشحنة
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.text(`رقم الشحنة: ${shipment.shipmentNumber}`, 190, yPosition, { align: 'right' });
+                yPosition += 8;
+                doc.text(`عدد الأطراف: ${shipment.parties.length}`, 190, yPosition, { align: 'right' });
+                yPosition += 8;
+                doc.text(`الحالة: ${this.getShipmentStatusText(shipment.status)}`, 190, yPosition, { align: 'right' });
+                yPosition += 8;
+                doc.text(`تاريخ الإنشاء: ${new Date(shipment.createdAt).toLocaleDateString('ar-SA')}`, 190, yPosition, { align: 'right' });
+                yPosition += 15;
+                
+                // عنوان قائمة الأطراف
+                doc.setFontSize(14);
+                doc.setTextColor(26, 35, 126); // لون أزرق داكن
+                doc.text('قائمة الأطراف', 105, yPosition, { align: 'center' });
+                yPosition += 10;
+                
+                // رؤوس جدول الأطراف
+                doc.setFontSize(10);
+                doc.setTextColor(255, 255, 255); // لون أبيض
+                doc.setFillColor(26, 35, 126); // خلفية زرقاء داكنة
+                doc.rect(10, yPosition, 190, 10, 'F');
+                doc.text('اسم الطرف', 190, yPosition + 7, { align: 'right' });
+                doc.text('نوع الطرف', 150, yPosition + 7, { align: 'right' });
+                doc.text('الوزن', 120, yPosition + 7, { align: 'right' });
+                doc.text('عدد الوحدات', 90, yPosition + 7, { align: 'right' });
+                doc.text('التاريخ', 60, yPosition + 7, { align: 'right' });
+                yPosition += 15;
+                
+                // بيانات الأطراف
+                doc.setTextColor(0, 0, 0); // لون أسود
+                doc.setFontSize(9);
+                
+                shipment.parties.forEach((party, index) => {
+                    if (yPosition > 270) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    doc.text(party.partyName, 190, yPosition, { align: 'right' });
+                    doc.text(this.getPartyTypeText(party.partyType), 150, yPosition, { align: 'right' });
+                    doc.text(`${party.weight} كجم`, 120, yPosition, { align: 'right' });
+                    doc.text(party.units.toString(), 90, yPosition, { align: 'right' });
+                    doc.text(new Date(party.addedAt).toLocaleDateString('ar-SA'), 60, yPosition, { align: 'right' });
+                    
+                    yPosition += 8;
+                    
+                    // خط فاصل بين الصفوف
+                    if (index < shipment.parties.length - 1) {
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(10, yPosition, 200, yPosition);
+                        yPosition += 5;
+                    }
+                });
+            }
+
+            changePassword() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const messageDiv = document.getElementById('passwordMessage');
+                
                 if (currentPassword !== this.systemPassword) {
-                    return 'كلمة المرور الحالية غير صحيحة';
+                    messageDiv.innerHTML = '<div class="alert alert-error">❌ كلمة المرور الحالية غير صحيحة</div>';
+                    return;
                 }
-
+                
+                if (newPassword.length < 6) {
+                    messageDiv.innerHTML = '<div class="alert alert-error">❌ كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل</div>';
+                    return;
+                }
+                
                 if (newPassword !== confirmPassword) {
-                    return 'كلمة المرور الجديدة غير متطابقة';
+                    messageDiv.innerHTML = '<div class="alert alert-error">❌ كلمات المرور غير متطابقة</div>';
+                    return;
                 }
-
-                if (newPassword.length < 4) {
-                    return 'كلمة المرور يجب أن تكون 4 أحرف على الأقل';
-                }
-
+                
                 this.systemPassword = newPassword;
                 localStorage.setItem('systemPassword', newPassword);
-                return 'success';
-            }
-
-            getStatusText(status) {
-                const statusMap = {
-                    'active': 'نشطة',
-                    'completed': 'مكتملة'
-                };
-                return statusMap[status] || status;
+                
+                messageDiv.innerHTML = '<div class="alert alert-success">✅ تم تغيير كلمة المرور بنجاح</div>';
+                
+                // مسح الحقول
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
             }
 
             updateStats() {
                 const totalShipments = this.shipments.length;
                 const active = this.shipments.filter(s => s.status === 'active').length;
-                const completed = this.shipments.filter(s => s.status === 'completed').length;
                 const totalInvoices = this.invoices.length;
+                const totalInventory = this.inventory.length;
+                const totalEmployees = this.names.filter(n => n.nameType === 'employee').length;
+                const totalSuppliers = this.names.filter(n => n.nameType === 'supplier').length;
 
                 document.getElementById('totalShipments').textContent = totalShipments;
                 document.getElementById('activeShipments').textContent = active;
-                document.getElementById('completedShipments').textContent = completed;
                 document.getElementById('totalInvoices').textContent = totalInvoices;
+                document.getElementById('totalInventory').textContent = totalInventory;
+                document.getElementById('totalEmployees').textContent = totalEmployees;
+                document.getElementById('totalSuppliers').textContent = totalSuppliers;
             }
 
             showMessage(elementId, message, type) {
                 const element = document.getElementById(elementId);
-                const className = type === 'success' ? 'alert-success' : 'alert-error';
-                element.innerHTML = `<div class="alert ${className}">${message}</div>`;
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+                element.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
                 
+                // إخفاء الرسالة بعد 5 ثواني
                 setTimeout(() => {
                     element.innerHTML = '';
-                }, 10000);
+                }, 5000);
             }
 
             clearForm(formId) {
                 document.getElementById(formId).reset();
-                this.calculateInvoiceTotal();
+                if (formId === 'newInvoiceForm') {
+                    this.calculateInvoiceTotal();
+                }
+            }
+
+            hideInvoiceForm() {
+                document.getElementById('invoiceForm').style.display = 'none';
+            }
+
+            hideNameForm() {
+                document.getElementById('nameForm').style.display = 'none';
+            }
+
+            hideInventoryForm() {
+                document.getElementById('inventoryForm').style.display = 'none';
             }
 
             saveToStorage() {
                 localStorage.setItem('shipments', JSON.stringify(this.shipments));
                 localStorage.setItem('invoices', JSON.stringify(this.invoices));
+                localStorage.setItem('names', JSON.stringify(this.names));
+                localStorage.setItem('inventory', JSON.stringify(this.inventory));
             }
         }
 
         // دوال المساعدة العالمية
-        let shipmentSystem;
+        let accountSystem;
 
         function openTab(tabName) {
             // إخفاء جميع المحتويات
@@ -1682,8 +3331,37 @@
             }
 
             // تحديث الإحصائيات إذا كانت الصفحة الرئيسية
-            if (tabName === 'home' && shipmentSystem) {
-                shipmentSystem.updateStats();
+            if (tabName === 'home' && accountSystem) {
+                accountSystem.updateStats();
+            }
+
+            // عرض الأطراف إذا كانت صفحة الأطراف
+            if (tabName === 'parties' && accountSystem) {
+                accountSystem.displayParties();
+            }
+        }
+
+        function viewShipmentParties(id) {
+            if (accountSystem) {
+                accountSystem.viewShipmentParties(id);
+            }
+        }
+
+        function deleteShipment(id) {
+            if (accountSystem) {
+                accountSystem.deleteShipment(id);
+            }
+        }
+
+        function deleteParty(shipmentId, partyIndex) {
+            if (accountSystem) {
+                accountSystem.deleteParty(shipmentId, partyIndex);
+            }
+        }
+
+        function exportShipmentToPDF(id) {
+            if (accountSystem) {
+                accountSystem.exportShipmentToPDF(id);
             }
         }
 
@@ -1697,102 +3375,170 @@
         }
 
         function loadInvoices() {
-            if (shipmentSystem) {
-                shipmentSystem.loadInvoices();
+            if (accountSystem) {
+                accountSystem.loadInvoices();
             }
         }
 
-        function viewInvoice(invoiceNumber) {
-            if (shipmentSystem) {
-                shipmentSystem.viewInvoice(invoiceNumber);
+        function viewInvoice(id) {
+            if (accountSystem) {
+                accountSystem.viewInvoice(id);
             }
         }
 
-        function deleteInvoice(invoiceNumber) {
-            if (shipmentSystem) {
-                shipmentSystem.deleteInvoice(invoiceNumber);
+        function printInvoice(id) {
+            if (accountSystem) {
+                accountSystem.printInvoice(id);
+            }
+        }
+
+        function deleteInvoice(id) {
+            if (accountSystem) {
+                accountSystem.deleteInvoice(id);
             }
         }
 
         function deleteAllInvoices() {
-            if (shipmentSystem) {
-                shipmentSystem.deleteAllInvoices();
+            if (accountSystem) {
+                accountSystem.deleteAllInvoices();
             }
         }
 
-        function exportInvoicesToExcel() {
-            if (shipmentSystem) {
-                shipmentSystem.exportInvoicesToExcel();
+        function exportInvoicesToPDF() {
+            if (accountSystem) {
+                accountSystem.exportInvoicesToPDF();
             }
         }
 
-        function printInvoice(invoiceNumber) {
-            // تمت معالجته في viewInvoice
+        function showNameForm() {
+            document.getElementById('nameForm').style.display = 'block';
+            document.getElementById('nameMessage').innerHTML = '';
+        }
+
+        function hideNameForm() {
+            document.getElementById('nameForm').style.display = 'none';
+        }
+
+        function loadNames() {
+            if (accountSystem) {
+                accountSystem.loadNames();
+            }
+        }
+
+        function viewName(id) {
+            if (accountSystem) {
+                accountSystem.viewName(id);
+            }
+        }
+
+        function deleteName(id) {
+            if (accountSystem) {
+                accountSystem.deleteName(id);
+            }
+        }
+
+        function deleteAllNames() {
+            if (accountSystem) {
+                accountSystem.deleteAllNames();
+            }
+        }
+
+        function exportNamesToPDF() {
+            if (accountSystem) {
+                accountSystem.exportNamesToPDF();
+            }
+        }
+
+        function showInventoryForm() {
+            document.getElementById('inventoryForm').style.display = 'block';
+            document.getElementById('inventoryMessage').innerHTML = '';
+        }
+
+        function hideInventoryForm() {
+            document.getElementById('inventoryForm').style.display = 'none';
+        }
+
+        function loadInventory() {
+            if (accountSystem) {
+                accountSystem.loadInventory();
+            }
+        }
+
+        function viewInventoryItem(id) {
+            if (accountSystem) {
+                accountSystem.viewInventoryItem(id);
+            }
+        }
+
+        function deleteInventoryItem(id) {
+            if (accountSystem) {
+                accountSystem.deleteInventoryItem(id);
+            }
+        }
+
+        function deleteAllInventory() {
+            if (accountSystem) {
+                accountSystem.deleteAllInventory();
+            }
+        }
+
+        function exportInventoryToPDF() {
+            if (accountSystem) {
+                accountSystem.exportInventoryToPDF();
+            }
         }
 
         function loadReports() {
-            if (shipmentSystem) {
-                shipmentSystem.loadReports();
+            if (accountSystem) {
+                accountSystem.loadReports();
             }
         }
 
         function filterShipments() {
-            if (shipmentSystem) {
-                shipmentSystem.filterShipments();
-            }
-        }
-
-        function showComparison(shipmentNumber) {
-            if (shipmentSystem) {
-                shipmentSystem.showComparison(shipmentNumber);
-            }
-        }
-
-        function deleteShipment(shipmentNumber) {
-            if (shipmentSystem) {
-                shipmentSystem.deleteShipment(shipmentNumber);
+            if (accountSystem) {
+                accountSystem.filterShipments();
             }
         }
 
         function deleteAllShipments() {
-            if (shipmentSystem) {
-                shipmentSystem.deleteAllShipments();
+            if (accountSystem) {
+                accountSystem.deleteAllShipments();
             }
         }
 
-        function exportToExcel() {
-            if (shipmentSystem) {
-                shipmentSystem.exportToExcel();
+        function exportToPDF() {
+            if (accountSystem) {
+                accountSystem.exportToPDF();
             }
         }
 
         function changePassword() {
-            if (!shipmentSystem) return;
-
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            const result = shipmentSystem.changePassword(currentPassword, newPassword, confirmPassword);
-            const messageDiv = document.getElementById('passwordMessage');
-
-            if (result === 'success') {
-                messageDiv.innerHTML = '<div class="alert alert-success">✅ تم تغيير كلمة المرور بنجاح</div>';
-                document.getElementById('currentPassword').value = '';
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmPassword').value = '';
-            } else {
-                messageDiv.innerHTML = `<div class="alert alert-error">❌ ${result}</div>`;
+            if (accountSystem) {
+                accountSystem.changePassword();
             }
+        }
 
-            setTimeout(() => {
-                messageDiv.innerHTML = '';
-            }, 5000);
+        function showPDFExportModal() {
+            if (accountSystem) {
+                accountSystem.showPDFExportModal();
+            }
+        }
+
+        function closePDFModal() {
+            if (accountSystem) {
+                accountSystem.closePDFExportModal();
+            }
+        }
+
+        function generatePDF() {
+            if (accountSystem) {
+                accountSystem.generatePDF();
+            }
         }
 
         // تهيئة النظام عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
-            shipmentSystem = new ShipmentSystem();
+            accountSystem = new AccountSystem();
         });
     </script>
 </body>
